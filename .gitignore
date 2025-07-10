@@ -1,0 +1,9 @@
+__pycache__
+code/py
+code/.idea/inspectionProfiles/Shelf
+code/.idea/inspectionProfiles/workspace.xml
+wastelands/*
+code/.idea/migrids-lite.iml
+code/.idea/misc.xml
+.venv/
+code/.idea/
