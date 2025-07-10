@@ -3,7 +3,7 @@ Welcome to MiGRIDS Lite! MiGRIDS Lite is a smaller and easier to use version of 
 
 MiGRIDS Lite is a Python package that is used to model hourly electricity usage when a renewable energy source is added and, optionally, with battery storage. The energy balance calculations take into consideration diesel generator minimum operating load, spinning reserve limits, and more. The renewable energy source is technology agnostic; as long as there is an hourly time series, it can be modeled. Batteries can be user defined, and options for adding multipliers to explore various scenarious is optional.
 
-This software is meant to be a first order estimation of the effect of adding renewable energy and storage. For more information regarding how this is calculated, see the technical details in the wiki.
+This software is meant to be a first order estimation of the effect of adding renewable energy and storage. For more information regarding how this is calculated, just wait.
 
 ## MiGRIDS Lite History
 
