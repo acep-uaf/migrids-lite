@@ -9,6 +9,6 @@ The default license for this project is [AGPL-3.0-only](LICENSE).
 The following are licensed under [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/deed.en)
 
 ```
-wiki
+Migrids Lite wiki
 README.md
 ```
