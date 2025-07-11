@@ -12,6 +12,6 @@ description = "MiGRIDS Lite is a simple hourly energy balance modeling tool that
 author = [
 	{name = "Bax Bond", email = "bwbond@alaska.edu"}
 ]
-license = "MIT"
+license = "AGPL-3.0-only"
 [tool.hatch.version]
 path = "src/migrids_lite/__init__.py"
