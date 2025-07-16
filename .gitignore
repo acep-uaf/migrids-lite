@@ -7,3 +7,4 @@ code/.idea/migrids-lite.iml
 code/.idea/misc.xml
 .venv/
 code/.idea/
+.ipynb_checkpoints

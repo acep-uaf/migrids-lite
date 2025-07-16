@@ -17,8 +17,15 @@ class TankFarm:
 
         self.totals['total_fuel_used'] = round(self.usages['timestep_fuel_used'].sum(), 3)
         self.totals['diesel_kwh_produced'] = round(self.vitals['diesel_out'][1:].sum(), 3)
-        self.totals['resource_kwh_produced'] = round(self.vitals['resource'][1:].sum()-self.vitals['curtailed'].sum(), 3)
         self.totals['resource_kwh_curtailed'] = round(self.vitals['curtailed'][1:].sum(), 3)
+
+        # since the different have different numbers of columns & the resource kwh produced calculation depends on the
+        # battery, they need to be calculated differently
+        if len(self.vitals.columns) > 3:
+            self.totals['resource_kwh_produced'] = round(self.vitals['resource'][1:].sum() -
+                                                         self.vitals['curtailed'].sum(), 3)
+        else:
+            self.totals['resource_kwh_produced'] = round(self.vitals['resource'][1:].sum(), 3)
 
         # get the total usages for each generator
         for generators in self.kraftwerk.gensets:
