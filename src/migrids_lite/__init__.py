@@ -9,7 +9,7 @@ __all__ = ["EnergyInputs",
 		"System",
 		"OpParams"]
 
-__version__ = "0.0.2"
+__version__ = "1.0.0"
 
 __doc__ = """
 MiGRIDS Lite - a simple, hourly energy balance modeling package for Python
