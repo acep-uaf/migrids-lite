@@ -33,7 +33,7 @@ vrla = mlt.Storage.Storage('vrla', 50, 100, 1000, 0.3)
 
 gen_shifting = mlt.System.System(e_loads, pwrhouse, 's', vrla, resource_input=resources)
 
-print(gen_shifting.fuel_usages.vitals)
+print(gen_shifting.vitals)
 
 # t1 = timeit.default_timer()
 

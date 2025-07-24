@@ -99,3 +99,5 @@ class System:
             self.fuel_usages = tanks.TankFarm(power_house, self.shift.vitals)
 
         else: raise Exception('unrecognized mode')
+
+        self.vitals = self.fuel_usages.vitals
