@@ -76,6 +76,12 @@ class Powerhouse:
         return pwrhouse_usage
 
     def calc_genload(self, eload: float, select_combo: tuple):
+        """
+        calculate the per generator load
+        :param eload: the overall load
+        :param select_combo: the selected combination of the generators
+        :return:
+        """
         if select_combo is None:
             return {'None': 0}
 
