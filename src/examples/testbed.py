@@ -14,7 +14,7 @@ pd.set_option('display.width', None)
 # print(elec_load.data)
 
 testload = [randrange(120, 1000) for x in range(0, 40)]
-testresource = [randrange(200, 500) if x < 4000 else 0 for x in range(0, 40)]
+testresource = [randrange(200, 300) if x < 4000 else 0 for x in range(0, 40)]
 #
 #
 e_loads = mlt.EnergyType.EnergyType('electric_load', pd.DataFrame(testload))
@@ -25,15 +25,15 @@ resources = mlt.EnergyType.EnergyType('resource', pd.DataFrame(testresource))
 
 e_in = mlt.EnergyInputs.EnergyInputs(e_loads, resources)
 
-fohundy = mlt.Generator.Generator('fohundy', 400, 0.30, {0.50: 14, 1.00: 28})
-sixhundy = mlt.Generator.Generator('sixhundy', 600, 0.30, {0.50: 21, 1.00: 42})
+fohundy = mlt.Generator.Generator('fohundy', 400, 0.50, {0.50: 14, 1.00: 28})
+sixhundy = mlt.Generator.Generator('sixhundy', 600, 0.50, {0.50: 21, 1.00: 42})
 pwrhouse = mlt.Powerhouse.Powerhouse((fohundy, sixhundy))
 
 vrla = mlt.Storage.Storage('vrla', 50, 100, 1000, 0.3)
 
-gen_shifting = mlt.System.System(e_loads, pwrhouse, 's', vrla, resources)
+gen_shifting = mlt.System.System(e_loads, pwrhouse, 's', vrla, resource_input=resources)
 
-print(gen_shifting.fuel_usages.usages)
+print(gen_shifting.fuel_usages.vitals)
 
 # t1 = timeit.default_timer()
 

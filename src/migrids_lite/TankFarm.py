@@ -12,8 +12,11 @@ class TankFarm:
         # needs to be from index 1 since initialization from 0 happens at the zero index
         inter['gen_combo'] = self.vitals['diesel_out'][1:].apply(self.kraftwerk.find_cap_combo)
         inter['diesel_out'] = self.vitals['diesel_out'][1:]
+        self.usages['gen_power'] = inter.apply(lambda x: self.kraftwerk.calc_genload(x['diesel_out'], x['gen_combo']), axis=1)
         self.usages['gen_fuel_used'] = inter.apply(lambda x: self.kraftwerk.calc_gencombo(x['diesel_out'], x['gen_combo']), axis=1)
         self.usages['timestep_fuel_used'] = self.usages.apply(lambda x: sum(x['gen_fuel_used'].values()), axis=1)
+
+        self.vitals = pd.concat([self.vitals, self.usages], axis=1)
 
         self.totals['total_fuel_used'] = round(self.usages['timestep_fuel_used'].sum(), 3)
         self.totals['diesel_kwh_produced'] = round(self.vitals['diesel_out'][1:].sum(), 3)
