@@ -80,17 +80,17 @@ class System:
         elif calc_mode == 's' or calc_mode == 'storage timeshift':
             print('calculating in storage timeshift')
 
+            if storage is None:
+                raise Exception('battery not defined, make sure to define the battery before calling this function')
+
             try:
                 data_in = e_inp.EnergyInputs(resource_input, load_input)
             except:
                 raise Exception('resource input error, make sure that the resource input is properly imported')
 
             self.src = srcl.SrcLimits(data_in, power_house)
-            try:
-                self.src.calc_all(storage.rated_discharge, src_multi=oper_params.src_mult,
+            self.src.calc_all(storage.rated_discharge, src_multi=oper_params.src_mult,
                               re_src_multi=oper_params.resource_src_mult)
-            except:
-                raise  Exception('battery not defined, make sure to define the battery before calling this function')
 
             self.shift = tshift.Timeshift(storage, self.src)
             self.shift.calc(residual_cutoff=oper_params.residual_cutoff, batt_reset=oper_params.batt_reset)
@@ -99,3 +99,5 @@ class System:
             self.fuel_usages = tanks.TankFarm(power_house, self.shift.vitals)
 
         else: raise Exception('unrecognized mode')
+
+        self.vitals = self.fuel_usages.vitals

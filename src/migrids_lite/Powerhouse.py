@@ -48,12 +48,39 @@ class Powerhouse:
         # self.combo_mol_caps = dict(sorted(self.combo_mol_caps.keys()))
         # self.gencombos = tuple(self.combo_mol_caps.keys())
 
-    def calc_gencombo(self, eload: float, select_combo: tuple):
+    def calc_gen_fuel(self, gen_loads: dict):
         """
         calculate the fuel usage of the generator combo
         :param eload: the overall electrical load
         :param select_combo: the combination of generators to be used
         :return: the dict of the fuel usage, keys are generators and values are pandas dataframes
+        """
+        # if select_combo is None:
+        #     return {'None': 0}
+        #
+        # sum = 0
+        # if len(select_combo) == 1:
+        #     sum = self.gendict_cap[select_combo[0]]
+        # else:
+        #     for generator in select_combo:
+        #         sum += self.gendict_cap[generator]
+        #
+        # if sum != 0:
+        #     ratios = {item:self.gendict_cap[item]/sum for item in select_combo}
+        # else:
+        #     # if the generators are off there is nothing to return
+        #     return 0
+
+        pwrhouse_usage = {gen: round(self.gensets[gen].calc_diesel_usage(gen_loads[gen]), 3)
+                          for gen in gen_loads}
+        return pwrhouse_usage
+
+    def calc_gen_load(self, eload: float, select_combo: tuple):
+        """
+        calculate the per generator load
+        :param eload: the overall load
+        :param select_combo: the selected combination of the generators
+        :return:
         """
         if select_combo is None:
             return {'None': 0}
@@ -71,10 +98,9 @@ class Powerhouse:
             # if the generators are off there is nothing to return
             return 0
 
-        # eload.electric_load is a placeholder for now. need to figure out how to do scheduling before final
-        pwrhouse_usage = {gen: round(self.gensets[gen].calc_diesel_usage(eload*ratios[gen]), 3)
-                          for gen in select_combo}
-        return pwrhouse_usage
+        pwrhouse_pow = {gen: round(eload*ratios[gen], 3) for gen in select_combo}
+        return pwrhouse_pow
+
 
     def find_cap_combo(self, cap_need: int):
         """
@@ -85,9 +111,12 @@ class Powerhouse:
         if pd.isna(cap_need):
             return None
 
-        cap_above = {cap:combo for (cap, combo) in self.combo_caps.items() if cap >= cap_need}
-        gen_combo = cap_above[min(cap_above.keys(), key = lambda key: abs(key-cap_need))]
-        return gen_combo
+        try:
+            cap_above = {cap:combo for (cap, combo) in self.combo_caps.items() if cap >= cap_need}
+            gen_combo = cap_above[min(cap_above.keys(), key = lambda key: abs(key-cap_need))]
+            return gen_combo
+        except:
+            raise Exception('Invalid capacity: requested capacity is out of bounds of generator(s) capacity')
 
     def find_mol(self, combo: tuple):
         """
