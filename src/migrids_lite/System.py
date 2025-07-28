@@ -53,7 +53,7 @@ class System:
             self.src.vitals['resource'] = self.src.calc_frame['dsrc_resource_out']
             self.src.vitals['curtailed'] = self.src.calc_frame['dsrc_surplus']
 
-            self.fuel_usages = tanks.TankFarm(power_house, self.src.vitals)
+            self.vitals = tanks.TankFarm(power_house, self.src.vitals)
 
 
         elif calc_mode == 'r' or calc_mode == 'resource offset':
@@ -74,7 +74,7 @@ class System:
             self.src.vitals['resource'] = self.src.calc_frame['dsrc_resource_out']
             self.src.vitals['curtailed'] = self.src.calc_frame['dsrc_surplus']
 
-            self.fuel_usages = tanks.TankFarm(power_house, self.src.vitals)
+            self.vitals = tanks.TankFarm(power_house, self.src.vitals)
 
 
         elif calc_mode == 's' or calc_mode == 'storage timeshift':
@@ -96,8 +96,6 @@ class System:
             self.shift.calc(residual_cutoff=oper_params.residual_cutoff, batt_reset=oper_params.batt_reset)
             self.shift.get_vitals()
 
-            self.fuel_usages = tanks.TankFarm(power_house, self.shift.vitals)
+            self.vitals = tanks.TankFarm(power_house, self.shift.vitals)
 
         else: raise Exception('unrecognized mode')
-
-        self.vitals = self.fuel_usages.vitals
