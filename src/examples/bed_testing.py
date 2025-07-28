@@ -33,7 +33,7 @@ vrla = mlt.Storage.Storage('vrla', 50, 100, 1000, 0.3)
 
 gen_shifting = mlt.System.System(e_loads, pwrhouse, 's', vrla, resource_input=resources)
 
-print(gen_shifting.vitals)
+print(gen_shifting.vitals.frame)
 
 # t1 = timeit.default_timer()
 
@@ -45,11 +45,11 @@ print(gen_shifting.vitals)
 # testshifting.calc(batt_reset=0.3, residual_cutoff=0.005)
 # testshifting.get_vitals()
 #
-# tanks = mlt.TankFarm.TankFarm(pwrhouse, testshifting.vitals)
+# tanks = mlt.TankFarm.TankFarm(pwrhouse, testshifting.frame)
 #
 # t2 = timeit.default_timer()
 #
 # print(t2-t1)
 # print(tanks.usages)
-# print(testshifting.vitals)
+# print(testshifting.frame)
 # print(tanks.totals)

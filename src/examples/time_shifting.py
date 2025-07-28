@@ -28,5 +28,5 @@ battery = mlt.Storage.Storage('example_batt', 100, 50, 100, 0.3)
 # calculate in storage time shifting mode
 gen_shifting = mlt.System.System(electric_load, power_house, 's', storage=battery, resource_input=solar_energy)
 
-print(gen_shifting.shift.vitals)
-print(gen_shifting.fuel_usages.totals)
+
+print(gen_shifting.vitals.frame)
