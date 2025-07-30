@@ -20,6 +20,7 @@ class Powerhouse:
         self.gendict_mol = {item.ident:item.mol for item in gensets}
         self.gencombos = powerset(self.gendict_mol)
         self.gendict_cap = {item.ident:item.capacity for item in gensets}
+        self.min_mol = min(self.gendict_mol.values())
 
         # finding all the possible combinations of the minimum operating load
         self.combo_mol_caps = {}
