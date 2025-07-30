@@ -2,6 +2,7 @@ import pandas as pd
 from migrids_lite import EnergyType as EType
 from migrids_lite import EnergyInputs as EIn
 from migrids_lite import Powerhouse as powhouse
+import warnings
 
 
 class SrcLimits:
@@ -55,8 +56,12 @@ class SrcLimits:
         calculates the actual diesel output based on minimum operating load of the diesel
         :param min_operating_load: minimum operating load of the diesel in kW
         """
-        min_mol = min(self.powerhouse.combo_mol_caps, key=self.powerhouse.combo_mol_caps.get)
-        self.calc_frame['src_diesel_output'] = self.calc_frame['dummy_diesel'].clip(self.powerhouse.combo_mol_caps[min_mol], None)
+        if self.powerhouse.min_mol > self.elec_load['electric_load'].min():
+            warnings.warn('Electric load below powerhouse minimum operating load: the electric load has 1 or more '
+                          'instances where its value is below the minimum output of the powerhouse. '
+                          'Energy balance calculations may be invalid', stacklevel=4)
+
+        self.calc_frame['src_diesel_output'] = self.calc_frame['dummy_diesel'].clip(self.powerhouse.min_mol, None)
 
     def dsrc_resource_out(self):
         """
@@ -91,10 +96,3 @@ class SrcLimits:
         self.src_diesel_out()
         self.dsrc_resource_out()
         self.dsrc_resource_surplus()
-
-    def no_batt(self):
-        """
-        this renames parameters for a no battery case for fuel usage to be calculated by the TankFarm
-        :return: TankFarm compatible dataframe
-        """
-        
