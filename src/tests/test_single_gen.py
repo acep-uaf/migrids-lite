@@ -19,7 +19,11 @@ pd.set_option('display.width', None)
 four_hund = mlt.Generator.Generator('four_hund', 400, 0.30, {0.50: 14, 1.00: 28})
 power_house = mlt.Powerhouse.Powerhouse((four_hund,))
 
-electric_load = [randrange(0, 1100) for x in range(0, 24)]
+electric = [randrange(int(power_house.min_mol), int(power_house.capacity)) for x in range(0, 24)]
+solar = [randrange(0, 400) for x in range(0, 24)]
+
+electric_load = mlt.EnergyType.EnergyType('electric_load', pd.DataFrame(electric))
+solar_energy = mlt.EnergyType.EnergyType('resource', pd.DataFrame(solar))
 
 battery = mlt.Storage.Storage('example_batt', 50, 100, 100, 0.3)
 
