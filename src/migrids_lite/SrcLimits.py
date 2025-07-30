@@ -56,7 +56,7 @@ class SrcLimits:
         calculates the actual diesel output based on minimum operating load of the diesel
         :param min_operating_load: minimum operating load of the diesel in kW
         """
-        if self.powerhouse.min_mol > self.elec_load['electric_load'].min():
+        if self.powerhouse.min_mol > self.elec_load['electric_load'][1:].min():
             warnings.warn('Electric load below powerhouse minimum operating load: the electric load has 1 or more '
                           'instances where its value is below the minimum output of the powerhouse. '
                           'Energy balance calculations may be invalid', stacklevel=4)
