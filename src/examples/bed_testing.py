@@ -33,7 +33,13 @@ vrla = mlt.Storage.Storage('vrla', 50, 100, 1000, 0.3)
 
 gen_shifting = mlt.System.System(e_loads, pwrhouse, 's', vrla, resource_input=resources)
 
+discharge = -1*gen_shifting.vitals.frame['charge_dis'].mask(gen_shifting.vitals.frame['charge_dis'] > 0).fillna(0)
+resource_to_load = gen_shifting.vitals.frame['resource_to_load']
+diesel_out = gen_shifting.vitals.frame['diesel_out']
+
+energy_to_load = discharge + resource_to_load + diesel_out
 print(gen_shifting.vitals.frame)
+print(gen_shifting.vitals.totals)
 
 # t1 = timeit.default_timer()
 

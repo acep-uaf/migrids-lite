@@ -23,7 +23,7 @@ power_house = mlt.Powerhouse.Powerhouse((four_hund,))
 
 # build the battery called 'example_batt', rated input is 50 kW, output is 100 kW,
 # and capacity is 100 kWh, minimum capacity percent is 30
-battery = mlt.Storage.Storage('example_batt', 100, 50, 100, 0.3)
+battery = mlt.Storage.Storage('example_batt', 50, 100, 100, 0.3)
 
 # calculate in storage time shifting mode
 gen_shifting = mlt.System.System(electric_load, power_house, 's', storage=battery, resource_input=solar_energy)
