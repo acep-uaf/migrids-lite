@@ -51,25 +51,10 @@ class Powerhouse:
     def calc_gen_fuel(self, gen_loads: dict):
         """
         calculate the fuel usage of the generator combo
-        :param eload: the overall electrical load
-        :param select_combo: the combination of generators to be used
+        :param gen_loads: dictionary of the timestep loading of the generator. key is generator ID
+        and the value is the loading
         :return: the dict of the fuel usage, keys are generators and values are pandas dataframes
         """
-        # if select_combo is None:
-        #     return {'None': 0}
-        #
-        # sum = 0
-        # if len(select_combo) == 1:
-        #     sum = self.gendict_cap[select_combo[0]]
-        # else:
-        #     for generator in select_combo:
-        #         sum += self.gendict_cap[generator]
-        #
-        # if sum != 0:
-        #     ratios = {item:self.gendict_cap[item]/sum for item in select_combo}
-        # else:
-        #     # if the generators are off there is nothing to return
-        #     return 0
 
         pwrhouse_usage = {gen: round(self.gensets[gen].calc_diesel_usage(gen_loads[gen]), 3)
                           for gen in gen_loads}
@@ -116,7 +101,7 @@ class Powerhouse:
             gen_combo = cap_above[min(cap_above.keys(), key = lambda key: abs(key-cap_need))]
             return gen_combo
         except:
-            raise Exception('Invalid capacity: requested capacity is out of bounds of generator(s) capacity')
+            raise Exception('Invalid capacity: requested capacity is out of above of generator(s) capacity') from None
 
     def find_mol(self, combo: tuple):
         """

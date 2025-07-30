@@ -2,21 +2,24 @@ import migrids_lite as mlt
 import pandas as pd
 import numpy as np
 import pytest
+from random import randrange
 
 # QOL for printing
 pd.set_option('display.max_columns', None)
 pd.set_option('display.width', None)
 
-
-all_data = pd.read_csv('../examples/example_data.tab', delimiter='\t')
-
-electric_load = mlt.EnergyType.EnergyType('electric_load', all_data['load'])
-
-solar_energy = mlt.EnergyType.EnergyType('resource', all_data['solar_energy'], multiplier=3)
+# below is static loads
+# all_data = pd.read_csv('../examples/example_data.tab', delimiter='\t')
+#
+# electric_load = mlt.EnergyType.EnergyType('electric_load', all_data['load'])
+#
+# solar_energy = mlt.EnergyType.EnergyType('resource', all_data['solar_energy'], multiplier=3)
 
 # create a generator, this one is 400 kW
 four_hund = mlt.Generator.Generator('four_hund', 400, 0.30, {0.50: 14, 1.00: 28})
 power_house = mlt.Powerhouse.Powerhouse((four_hund,))
+
+electric_load = [randrange(0, 1100) for x in range(0, 24)]
 
 battery = mlt.Storage.Storage('example_batt', 50, 100, 100, 0.3)
 
@@ -28,6 +31,10 @@ def test_total_energy_timestep():
     make sure the load is being met by the generator, resource, and battery for each timestep
     :return:
     """
+
+    # masks the column for only discharge at makes it positive, so that generator output + storage discharge + resource
+    # should equal the load
+
     discharge = -1 * gen_shifting.vitals.frame['charge_dis'].mask(gen_shifting.vitals.frame['charge_dis'] > 0).fillna(0)
     resource_to_load = gen_shifting.vitals.frame['resource_to_load']
     diesel_out = gen_shifting.vitals.frame['diesel_out']
