@@ -37,18 +37,19 @@ def test_total_energy_timestep():
 
     assert pd.testing.assert_series_equal(load, energy_to_load.fillna(0), check_names=False) is None
 
-# def test_total_gen_energy_run():
-#     """
-#     make sure the total gen kWh is the same as the vitals.totals
-#     :return:
-#     """
-#     frame_diesel_total = gen_shifting.vitals.frame['diesel_out'].sum()
-#     totals_diesel_total = gen_shifting.vitals.totals['diesel_kwh_produced']
+def test_total_gen_energy_run():
+    """
+    make sure the total gen kWh is the same as the vitals.totals
+    :return:
+    """
+    frame_diesel_total = gen_shifting.vitals.frame['diesel_out'].sum()
+    totals_diesel_total = gen_shifting.vitals.totals['diesel_kwh_produced']
 
     assert totals_diesel_total == pytest.approx(frame_diesel_total)
 
-def test_total_resource_run():
-    """
-    make the total resource kWh used is the same as the vitals.totals
-    :return:
-    """
+# def test_total_resource_run():
+#     """
+#     make the total resource kWh used is the same as the vitals.totals
+#     :return:
+#     """
+#
