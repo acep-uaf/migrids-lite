@@ -13,7 +13,7 @@ pd.set_option('display.width', None)
 # elec_load = mlt.GetElectricLoad(r'..\testbed_load.txt')
 # print(elec_load.data)
 
-testload = [randrange(120, 1000) for x in range(0, 40)]
+testload = [randrange(300, 1000) for x in range(0, 40)]
 testresource = [randrange(200, 300) if x < 4000 else 0 for x in range(0, 40)]
 #
 #

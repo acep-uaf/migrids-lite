@@ -103,7 +103,7 @@ class Powerhouse:
             gen_combo = cap_above[min(cap_above.keys(), key = lambda key: abs(key-cap_need))]
             return gen_combo
         except:
-            raise Exception('Invalid capacity: requested capacity is out of above of generator(s) capacity') from None
+            raise Exception('Invalid capacity: requested capacity is outside of powerhouse capacity') from None
 
     def find_mol(self, combo: tuple):
         """

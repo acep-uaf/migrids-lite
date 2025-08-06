@@ -34,12 +34,16 @@ class Generator:
              raise Exception('Error: fuel curve slope in wrong direction!')
 
     def calc_diesel_usage(self, e_load: float):
-        if e_load > self.capacity or e_load < self.mol:
-            raise Exception('Error: out of bounds of generator load envelope. Must be within ' + str(self.capacity) +
-                            'kW and ' + str(self.mol) + 'kW')
+        if e_load > self.capacity:
+            raise Exception('Error: out of bounds of generator envelope. Must be below ' + str(self.capacity) +
+                            'kW')
+        elif e_load <= self.mol:
+            load_normed = self.mol
         else:
             load_normed = e_load/self.capacity
-            fuel_usage = load_normed*self.fuel_curve.slope + self.fuel_curve.intercept
+
+        fuel_usage = load_normed*self.fuel_curve.slope + self.fuel_curve.intercept
+
         return fuel_usage
 
 
