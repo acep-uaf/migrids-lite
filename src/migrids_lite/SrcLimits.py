@@ -59,7 +59,7 @@ class SrcLimits:
         if self.powerhouse.min_mol > self.elec_load['electric_load'][1:].min():
             warnings.warn('Electric load below powerhouse minimum operating load: the electric load has 1 or more '
                           'instances where its value is below the minimum output of the powerhouse. '
-                          'Energy balance calculations may be invalid', stacklevel=4)
+                          'Excess electricity will be generated.', stacklevel=4)
 
         self.calc_frame['src_diesel_output'] = self.calc_frame['dummy_diesel'].clip(self.powerhouse.min_mol, None)
 

@@ -78,7 +78,7 @@ class System:
 
 
         elif calc_mode == 's' or calc_mode == 'storage timeshift':
-            print('calculating in storage timeshift')
+            print('calculating in storage timeshift mode')
 
             if storage is None:
                 raise Exception('battery not defined, make sure to define the battery before calling this function')
