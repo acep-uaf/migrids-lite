@@ -78,7 +78,11 @@ class Timeshift:
         iter_frame['diesel_cap_req'] = diesel_cap_req.max(axis=1)
 
         min_mol = min(self.powerhouse.combo_mol_caps, key=self.powerhouse.combo_mol_caps.get)
+
+        # TODO: discern between power needed and minimum diesel so that diesels can charge battery.
+
         iter_frame['diesel_out'] = iter_frame['diesel_out_poss'].clip(self.powerhouse.combo_mol_caps[min_mol], None)
+
 
         iter_frame['discharge'] = -1 * (self.static_frame['electric_load'] - self.static_frame['resource_to_load'] -
                                         iter_frame['diesel_out'])

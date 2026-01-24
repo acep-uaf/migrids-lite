@@ -28,7 +28,7 @@ battery = mlt.Storage.Storage('example_batt', 50, 100, 500, 0.3)
 
 # calculate diesel only usage
 diesel_src = mlt.System.System(electric_load, power_house, 'd')
-print(diesel_src.fuel_usages.totals)
+print(diesel_src.vitals.totals)
 
 # calculate in resource offset mode
 resource_offset = mlt.System.System(electric_load, power_house, 'r', resource_input=solar_energy)

@@ -7,12 +7,12 @@ class TankFarm:
         self.frame = vitals
         self.usages = pd.DataFrame()
         self.totals = dict()
-        inter = pd.DataFrame()
+        self.inter = pd.DataFrame()
 
         # needs to be from index 1 since initialization from 0 happens at the zero index
-        inter['gen_combo'] = self.frame['diesel_out'][1:].apply(self.kraftwerk.find_cap_combo)
-        inter['diesel_out'] = self.frame['diesel_out'][1:]
-        self.usages['gen_power'] = inter.apply(lambda x: self.kraftwerk.calc_gen_load(x['diesel_out'], x['gen_combo']), axis=1)
+        self.inter['gen_combo'] = self.frame['diesel_out'][1:].apply(self.kraftwerk.find_cap_combo)
+        self.inter['diesel_out'] = self.frame['diesel_out'][1:]
+        self.usages['gen_power'] = self.inter.apply(lambda x: self.kraftwerk.calc_gen_load(x['diesel_out'], x['gen_combo']), axis=1)
         self.usages['gen_fuel_used'] = self.usages.apply(lambda x: self.kraftwerk.calc_gen_fuel(x['gen_power']), axis=1)
         self.usages['timestep_fuel_used'] = self.usages.apply(lambda x: sum(x['gen_fuel_used'].values()), axis=1)
 
