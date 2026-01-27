@@ -5,10 +5,10 @@ build-backend = "hatchling.build"
 [project]
 name = "migrids_lite"
 dynamic = ["version"]
-dependencies = ["pandas~=2.2.2",
-                "scipy~=1.14.1",
-		"jupyter~=1.1.1",
-		"matplotlib~=3.10.3"]
+dependencies = ["pandas~=2.2",
+                "scipy~=1.14",
+		"jupyter~=1.1",
+		"matplotlib~=3.10"]
 requires-python = ">= 3.12"
 description = "MiGRIDS Lite is a simple hourly energy balance modeling tool that integrates a renewable energy source along with diesel generator and storage considerations."
 author = [
