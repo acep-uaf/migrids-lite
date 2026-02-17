@@ -26,7 +26,9 @@ power_house = mlt.Powerhouse.Powerhouse((four_hund,))
 battery = mlt.Storage.Storage('example_batt', 50, 100, 100, 0.3)
 
 # calculate in storage time shifting mode
-gen_shifting = mlt.System.System(electric_load, power_house, 's', storage=battery, resource_input=solar_energy)
+opers = mlt.OpParams.OpParams(gen_to_batt=False)
+gen_shifting = mlt.System.System(electric_load, power_house, 's', storage=battery, resource_input=solar_energy,
+                                 oper_params=opers)
 
 
 print(gen_shifting.vitals.frame)

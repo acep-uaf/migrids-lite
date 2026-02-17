@@ -82,14 +82,15 @@ class Timeshift:
         min_mol = min(self.powerhouse.combo_mol_caps, key=self.powerhouse.combo_mol_caps.get)
 
         # TODO: discern between power needed and minimum diesel so that diesels can charge battery.
-        if gen_to_batt:
-            pass
 
         iter_frame['diesel_out'] = iter_frame['diesel_out_poss'].clip(self.powerhouse.combo_mol_caps[min_mol], None)
 
-
-        iter_frame['discharge'] = -1 * (self.static_frame['electric_load'] - self.static_frame['resource_to_load'] -
+        if gen_to_batt:
+            iter_frame['discharge'] = -1 * (self.static_frame['electric_load'] - self.static_frame['resource_to_load'] -
                                         iter_frame['diesel_out'])
+        else:
+            iter_frame['discharge'] = -1 * (self.static_frame['electric_load'] - self.static_frame['resource_to_load'] -
+                                            iter_frame['diesel_out']).clip(0, None)
 
         charge_dis = pd.concat([iter_frame['charge'], iter_frame['discharge']], axis=1)
         iter_frame['charge_dis'] = charge_dis.apply(lambda x: x['charge'] if x['charge'] > 0 else x['discharge'], axis=1)
@@ -108,15 +109,16 @@ class Timeshift:
         self.static_frame['resource_to_load'] = self.init_frame['dsrc_resource_out']
 
         init_soc = self.init_frame['storage_requested'].apply(self.storage.calc_soc)
+        print(init_soc)
 
-        self.new_frame = self.iterate(init_soc, gen2batt)
+        self.new_frame = self.iterate(init_soc, batt_reset=batt_reset, gen_to_batt=gen2batt)
         resid = residuals(init_soc, self.new_frame['soc'])
 
         resid_flag = (resid >= residual_cutoff).any()
         iter_number = 0
         while resid_flag and iter_number < len(init_soc):
             this_soc = self.new_frame['soc']
-            self.new_frame = self.iterate(self.new_frame['soc'], batt_reset)
+            self.new_frame = self.iterate(self.new_frame['soc'], batt_reset=batt_reset, gen_to_batt=gen2batt)
             resid = residuals(this_soc, self.new_frame['soc'])
             resid_flag = (resid >= residual_cutoff).any()
             iter_number += 1
