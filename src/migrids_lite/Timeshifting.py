@@ -82,11 +82,8 @@ class Timeshift:
         min_mol = min(self.powerhouse.combo_mol_caps, key=self.powerhouse.combo_mol_caps.get)
 
         # TODO: discern between power needed and minimum diesel so that diesels can charge battery.
-        # don't clip low
-        # find difference between need and load, the rest can go to battery
-        # how to charge?
         if gen_to_batt:
-            print('hello')
+            pass
 
         iter_frame['diesel_out'] = iter_frame['diesel_out_poss'].clip(self.powerhouse.combo_mol_caps[min_mol], None)
 
@@ -123,6 +120,7 @@ class Timeshift:
             resid = residuals(this_soc, self.new_frame['soc'])
             resid_flag = (resid >= residual_cutoff).any()
             iter_number += 1
+            print(self.new_frame)
 
 
         return self.new_frame, iter_number
@@ -135,6 +133,6 @@ class Timeshift:
         self.vitals = pd.concat([self.static_frame[['electric_load', 'resource', 'resource_to_load']],
                             self.new_frame[['diesel_out', 'charge_dis', 'soc']]], axis=1)
         self.vitals['curtailed'] = (self.vitals['resource'] - self.vitals['resource_to_load'] -
-                                    self.vitals['charge_dis'].clip(0, None))
+                                    self.vitals['charge_dis'].clip(0, None)).clip(0, None)
 
         return self.vitals
