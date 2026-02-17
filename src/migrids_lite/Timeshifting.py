@@ -1,6 +1,7 @@
 import pandas as pd
 from migrids_lite import SrcLimits as slim
 from migrids_lite import Storage as stor
+from migrids_lite import OpParams as oppers
 
 
 def residuals(old_soc: pd.Series, new_soc: pd.Series):
@@ -49,11 +50,12 @@ class Timeshift:
                                                                     -1*x['storage_discharge_max'], axis=1)
 
 
-    def iterate(self, batt_soc: pd.Series, batt_reset: float = 0):
+    def iterate(self, batt_soc: pd.Series, batt_reset: float = 0, gen_to_batt: bool = True):
         """
         iterate over the battery state of charge once
         :param batt_soc: pandas series of the battery state of charge to iterate from
         :param batt_reset: reset value for the battery
+        :param gen_to_batt: use excess diesel generation to charge the battery
         :return: the converged dataframe or return an error if it doesn't converge.
         """
         iter_frame = pd.DataFrame()
@@ -80,6 +82,11 @@ class Timeshift:
         min_mol = min(self.powerhouse.combo_mol_caps, key=self.powerhouse.combo_mol_caps.get)
 
         # TODO: discern between power needed and minimum diesel so that diesels can charge battery.
+        # don't clip low
+        # find difference between need and load, the rest can go to battery
+        # how to charge?
+        if gen_to_batt:
+            print('hello')
 
         iter_frame['diesel_out'] = iter_frame['diesel_out_poss'].clip(self.powerhouse.combo_mol_caps[min_mol], None)
 
@@ -97,7 +104,7 @@ class Timeshift:
         return iter_frame
 
     # calculate after all the parameters are initialized
-    def calc(self, residual_cutoff: float = 0.005, batt_reset: float = 0):
+    def calc(self, residual_cutoff: float = 0.005, batt_reset: float = 0, gen2batt: bool = True):
         self.static_frame = pd.DataFrame()
         self.static_frame['electric_load'] = self.elec_load
         self.static_frame['resource'] = self.resource
@@ -105,7 +112,7 @@ class Timeshift:
 
         init_soc = self.init_frame['storage_requested'].apply(self.storage.calc_soc)
 
-        self.new_frame = self.iterate(init_soc)
+        self.new_frame = self.iterate(init_soc, gen2batt)
         resid = residuals(init_soc, self.new_frame['soc'])
 
         resid_flag = (resid >= residual_cutoff).any()

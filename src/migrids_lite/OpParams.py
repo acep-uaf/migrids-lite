@@ -1,6 +1,6 @@
 class OpParams:
     def __init__(self, src_mult: float = 0.1, resource_src_mult: float = 1, batt_reset: float = 0,
-                 residual_cutoff: float = 0.005):
+                 residual_cutoff: float = 0.005, gen_to_batt: bool = True):
         """
         Define operational parameters for the System
         :param src_mult: spinning reserve capacity multiplier for the electrical load in percent as decimal.
@@ -11,8 +11,11 @@ class OpParams:
         battery
         :param residual_cutoff: residual cutoff value for the iteration. default is 0.005 or 0.5% change from the
         previous iteration
+        :param gen_to_batt: charge the battery from excess diesel generation when the required load is under the mol of
+        the powerhouse
         """
         self.src_mult = src_mult
         self.resource_src_mult = resource_src_mult
         self.batt_reset = batt_reset
         self.residual_cutoff = residual_cutoff
+        self.gen_to_batt = gen_to_batt

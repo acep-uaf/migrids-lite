@@ -93,7 +93,8 @@ class System:
                               re_src_multi=oper_params.resource_src_mult)
 
             self.shift = tshift.Timeshift(storage, self.src)
-            self.shift.calc(residual_cutoff=oper_params.residual_cutoff, batt_reset=oper_params.batt_reset)
+            self.shift.calc(residual_cutoff=oper_params.residual_cutoff, batt_reset=oper_params.batt_reset,
+                            gen2batt=oper_params.gen_to_batt)
             self.shift.get_vitals()
 
             self.vitals = tanks.TankFarm(power_house, self.shift.vitals)
