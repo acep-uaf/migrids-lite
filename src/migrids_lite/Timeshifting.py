@@ -20,7 +20,7 @@ def residuals(old_soc: pd.Series, new_soc: pd.Series):
 
 
 class Timeshift:
-    def __init__(self, storage: stor, spinlims: slim):
+    def __init__(self, storage: stor, spinlims: slim, ops: oppers):
         # initialize all the variables
         self.storage = storage
         self.init_frame = spinlims.calc_frame
@@ -30,6 +30,7 @@ class Timeshift:
         self.static_frame = pd.DataFrame()
         self.new_frame = pd.DataFrame()
         self.vitals = pd.DataFrame()
+        self.op_params = ops
 
         # calculating the timeseries charge by the minimum between the resource surplus and rated charge
         # max(rated charge, resource surplus)
@@ -50,7 +51,7 @@ class Timeshift:
                                                                     -1*x['storage_discharge_max'], axis=1)
 
 
-    def iterate(self, batt_soc: pd.Series, batt_reset: float = 0, gen_to_batt: bool = True):
+    def iterate(self, batt_soc: pd.Series, batt_reset: float = 0):
         """
         iterate over the battery state of charge once
         :param batt_soc: pandas series of the battery state of charge to iterate from
@@ -85,7 +86,7 @@ class Timeshift:
 
         iter_frame['diesel_out'] = iter_frame['diesel_out_poss'].clip(self.powerhouse.combo_mol_caps[min_mol], None)
 
-        if gen_to_batt:
+        if self.op_params.gen_to_batt:
             iter_frame['discharge'] = -1 * (self.static_frame['electric_load'] - self.static_frame['resource_to_load'] -
                                         iter_frame['diesel_out'])
         else:
@@ -101,8 +102,9 @@ class Timeshift:
 
         return iter_frame
 
+    # TODO: have the OpParams be in the object instead of externally defined.
     # calculate after all the parameters are initialized
-    def calc(self, residual_cutoff: float = 0.005, batt_reset: float = 0, gen2batt: bool = True):
+    def calc(self, residual_cutoff: float = 0.005, batt_reset: float = 0):
         self.static_frame = pd.DataFrame()
         self.static_frame['electric_load'] = self.elec_load
         self.static_frame['resource'] = self.resource
@@ -111,14 +113,14 @@ class Timeshift:
         init_soc = self.init_frame['storage_requested'].apply(self.storage.calc_soc)
         print(init_soc)
 
-        self.new_frame = self.iterate(init_soc, batt_reset=batt_reset, gen_to_batt=gen2batt)
+        self.new_frame = self.iterate(init_soc, batt_reset=batt_reset)
         resid = residuals(init_soc, self.new_frame['soc'])
 
         resid_flag = (resid >= residual_cutoff).any()
         iter_number = 0
         while resid_flag and iter_number < len(init_soc):
             this_soc = self.new_frame['soc']
-            self.new_frame = self.iterate(self.new_frame['soc'], batt_reset=batt_reset, gen_to_batt=gen2batt)
+            self.new_frame = self.iterate(self.new_frame['soc'], batt_reset=batt_reset)
             resid = residuals(this_soc, self.new_frame['soc'])
             resid_flag = (resid >= residual_cutoff).any()
             iter_number += 1
