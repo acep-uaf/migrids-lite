@@ -25,6 +25,7 @@ class Generator:
             warn('Warning: minimum operating load is set less than or 0.2 or 20%!')
 
         self.fuel_curve = linregress(list(fuel_usage.keys()), list(fuel_usage.values()))
+        print(str(self.fuel_curve.slope) + ' & ' + str(self.fuel_curve.intercept))
 
         # warn if the fuel curve R squared is less than 0.9
         if self.fuel_curve.rvalue**2 <= 0.9:
@@ -38,11 +39,12 @@ class Generator:
             raise Exception('Error: out of bounds of generator envelope. Must be below ' + str(self.capacity) +
                             'kW')
         elif e_load <= self.mol:
-            load_normed = self.mol
+            load_normed = self.mol_percent
         else:
             load_normed = e_load/self.capacity
 
         fuel_usage = load_normed*self.fuel_curve.slope + self.fuel_curve.intercept
+        print(load_normed)
 
         return fuel_usage
 

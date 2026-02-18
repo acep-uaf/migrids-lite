@@ -102,7 +102,6 @@ class Timeshift:
 
         return iter_frame
 
-    # TODO: have the OpParams be in the object instead of externally defined.
     # calculate after all the parameters are initialized
     def calc(self, residual_cutoff: float = 0.005, batt_reset: float = 0):
         self.static_frame = pd.DataFrame()
@@ -111,7 +110,7 @@ class Timeshift:
         self.static_frame['resource_to_load'] = self.init_frame['dsrc_resource_out']
 
         init_soc = self.init_frame['storage_requested'].apply(self.storage.calc_soc)
-        print(init_soc)
+        # print(init_soc)
 
         self.new_frame = self.iterate(init_soc, batt_reset=batt_reset)
         resid = residuals(init_soc, self.new_frame['soc'])
@@ -124,7 +123,7 @@ class Timeshift:
             resid = residuals(this_soc, self.new_frame['soc'])
             resid_flag = (resid >= residual_cutoff).any()
             iter_number += 1
-            print(self.new_frame)
+            # print(self.new_frame)
 
 
         return self.new_frame, iter_number
