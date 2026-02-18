@@ -92,16 +92,21 @@ class Timeshift:
                                             iter_frame['diesel_out']).clip(None, 0)
             iter_frame['discharge'] = -1 * (self.static_frame['electric_load'] - self.static_frame['resource_to_load'] -
                                         iter_frame['diesel_out']).clip(0, None)
-            room_charge = (1-charge_poss-self.storage.rated_min_percent)
+
+            # TODO: this needs to be limited by rated charge, then that would make things easier.
+            room_charge = round((1-charge_poss-self.storage.rated_min_percent), 3)
+            print(room_charge)
 
             # diesel excess normalized to storage capacity
             de_storage_norm = iter_frame['diesel_excess']/self.storage.rated_storage
             # renewable charge normalized to storage capacity
             re_charge_norm = iter_frame['charge']/self.storage.rated_storage
+
             total_charge_poss = de_storage_norm + re_charge_norm
+            charge_poss_lim = total_charge_poss.clip(0, self.storage.rated_charge/self.storage.rated_storage)
 
             # TODO: limit the total charge poss dependent on the room to charge
-            print(total_charge_poss)
+            # print(total_charge_poss)
 
 
         else:
