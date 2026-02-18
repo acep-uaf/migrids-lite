@@ -38,7 +38,7 @@ class Generator:
             raise Exception('Error: out of bounds of generator envelope. Must be below ' + str(self.capacity) +
                             'kW')
         elif e_load <= self.mol:
-            load_normed = self.mol
+            load_normed = self.mol_percent
         else:
             load_normed = e_load/self.capacity
 

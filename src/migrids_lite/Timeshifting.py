@@ -62,9 +62,10 @@ class Timeshift:
         iter_frame = pd.DataFrame()
 
         # charging battery
-        charge = (batt_soc - self.storage.rated_min_percent).clip(0, self.storage.rated_charge)
-        charge = charge.diff() * self.storage.rated_storage
-        iter_frame['charge'] = charge.clip(0, self.storage.rated_charge)
+        # checks if the battery is able to be charged
+        charge_poss = (batt_soc - self.storage.rated_min_percent).clip(0, self.storage.rated_charge)
+        re_charge = charge_poss.diff() * self.storage.rated_storage
+        iter_frame['charge'] = re_charge.clip(0, self.storage.rated_charge)
 
         # possible discharge battery
         discharge_poss = pd.DataFrame()
@@ -87,8 +88,22 @@ class Timeshift:
         iter_frame['diesel_out'] = iter_frame['diesel_out_poss'].clip(self.powerhouse.combo_mol_caps[min_mol], None)
 
         if self.op_params.gen_to_batt:
+            iter_frame['diesel_excess'] = -1 * (self.static_frame['electric_load'] - self.static_frame['resource_to_load'] -
+                                            iter_frame['diesel_out']).clip(None, 0)
             iter_frame['discharge'] = -1 * (self.static_frame['electric_load'] - self.static_frame['resource_to_load'] -
-                                        iter_frame['diesel_out'])
+                                        iter_frame['diesel_out']).clip(0, None)
+            room_charge = (1-charge_poss-self.storage.rated_min_percent)
+
+            # diesel excess normalized to storage capacity
+            de_storage_norm = iter_frame['diesel_excess']/self.storage.rated_storage
+            # renewable charge normalized to storage capacity
+            re_charge_norm = iter_frame['charge']/self.storage.rated_storage
+            total_charge_poss = de_storage_norm + re_charge_norm
+
+            # TODO: limit the total charge poss dependent on the room to charge
+            print(total_charge_poss)
+
+
         else:
             iter_frame['discharge'] = -1 * (self.static_frame['electric_load'] - self.static_frame['resource_to_load'] -
                                             iter_frame['diesel_out']).clip(0, None)
@@ -102,7 +117,6 @@ class Timeshift:
 
         return iter_frame
 
-    # TODO: have the OpParams be in the object instead of externally defined.
     # calculate after all the parameters are initialized
     def calc(self, residual_cutoff: float = 0.005, batt_reset: float = 0):
         self.static_frame = pd.DataFrame()
@@ -111,7 +125,6 @@ class Timeshift:
         self.static_frame['resource_to_load'] = self.init_frame['dsrc_resource_out']
 
         init_soc = self.init_frame['storage_requested'].apply(self.storage.calc_soc)
-        print(init_soc)
 
         self.new_frame = self.iterate(init_soc, batt_reset=batt_reset)
         resid = residuals(init_soc, self.new_frame['soc'])
@@ -134,9 +147,12 @@ class Timeshift:
         get the "vital" information columns from the static frame and the calculated frame
         :return:
         """
-        self.vitals = pd.concat([self.static_frame[['electric_load', 'resource', 'resource_to_load']],
-                            self.new_frame[['diesel_out', 'charge_dis', 'soc']]], axis=1)
-        self.vitals['curtailed'] = (self.vitals['resource'] - self.vitals['resource_to_load'] -
-                                    self.vitals['charge_dis'].clip(0, None)).clip(0, None)
+        if not self.op_params.gen_to_batt:
+            self.vitals = pd.concat([self.static_frame[['electric_load', 'resource', 'resource_to_load']],
+                                self.new_frame[['diesel_out', 'charge_dis', 'soc']]], axis=1)
+            self.vitals['curtailed'] = (self.vitals['resource'] - self.vitals['resource_to_load'] -
+                                        self.vitals['charge_dis'].clip(0, None)).clip(0, None)
+        else:
+            print('vitals need to be calced')
 
         return self.vitals
