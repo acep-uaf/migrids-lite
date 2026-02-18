@@ -44,7 +44,6 @@ class Generator:
             load_normed = e_load/self.capacity
 
         fuel_usage = load_normed*self.fuel_curve.slope + self.fuel_curve.intercept
-        print(load_normed)
 
         return fuel_usage
 
