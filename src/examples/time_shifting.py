@@ -9,7 +9,7 @@ pd.set_option('display.width', None)
 all_data = pd.read_csv('example_data.tab', delimiter='\t')
 
 # get the electric load from the data
-electric_load = mlt.EnergyType.EnergyType('electric_load', all_data['load'])
+electric_load = mlt.EnergyType.EnergyType('electric_load', all_data['load'], multiplier=0.5)
 
 # get the resource available
 # the just 1 resource isn't enough to use the battery, so we make the resource bigger by a multiplier
@@ -26,7 +26,9 @@ power_house = mlt.Powerhouse.Powerhouse((four_hund,))
 battery = mlt.Storage.Storage('example_batt', 50, 100, 100, 0.3)
 
 # calculate in storage time shifting mode
-gen_shifting = mlt.System.System(electric_load, power_house, 's', storage=battery, resource_input=solar_energy)
+opers = mlt.OpParams.OpParams(gen_to_batt=False)
+gen_shifting = mlt.System.System(electric_load, power_house, 's', storage=battery, resource_input=solar_energy,
+                                 oper_params=opers)
 
 
 print(gen_shifting.vitals.frame)
