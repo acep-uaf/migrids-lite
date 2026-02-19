@@ -90,8 +90,6 @@ class Timeshift:
         if self.op_params.gen_to_batt:
             iter_frame['diesel_excess'] = -1 * (self.static_frame['electric_load'] - self.static_frame['resource_to_load'] -
                                             iter_frame['diesel_out']).clip(None, 0)
-            iter_frame['discharge'] = -1 * (self.static_frame['electric_load'] - self.static_frame['resource_to_load'] -
-                                        iter_frame['diesel_out']).clip(0, None)
 
             # TODO: this needs to be limited by rated charge, then that would make things easier.
             room_charge = round((1-charge_poss-self.storage.rated_min_percent), 3)
@@ -108,11 +106,8 @@ class Timeshift:
             # TODO: limit the total charge poss dependent on the room to charge
             # print(total_charge_poss)
 
-
-        else:
-            iter_frame['discharge'] = -1 * (self.static_frame['electric_load'] - self.static_frame['resource_to_load'] -
-                                            iter_frame['diesel_out']).clip(0, None)
-
+        iter_frame['discharge'] = -1 * (self.static_frame['electric_load'] - self.static_frame['resource_to_load'] -
+                                   iter_frame['diesel_out']).clip(0, None)
         charge_dis = pd.concat([iter_frame['charge'], iter_frame['discharge']], axis=1)
         iter_frame['charge_dis'] = charge_dis.apply(lambda x: x['charge'] if x['charge'] > 0 else x['discharge'], axis=1)
 
