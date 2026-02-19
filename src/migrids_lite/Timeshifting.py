@@ -86,11 +86,10 @@ class Timeshift:
         # TODO: discern between power needed and minimum diesel so that diesels can charge battery.
 
         iter_frame['diesel_out'] = iter_frame['diesel_out_poss'].clip(self.powerhouse.combo_mol_caps[min_mol], None)
-
-        if self.op_params.gen_to_batt:
-            iter_frame['diesel_excess'] = -1 * (self.static_frame['electric_load'] - self.static_frame['resource_to_load'] -
+        iter_frame['diesel_excess'] = -1 * (self.static_frame['electric_load'] - self.static_frame['resource_to_load'] -
                                             iter_frame['diesel_out']).clip(None, 0)
 
+        if self.op_params.gen_to_batt:
             # TODO: this needs to be limited by rated charge, then that would make things easier.
             room_charge = round((1-charge_poss-self.storage.rated_min_percent), 3)
             print(room_charge)
