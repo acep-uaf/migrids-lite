@@ -34,7 +34,6 @@ class Timeshift:
 
         # calculating the timeseries charge by the minimum between the resource surplus and rated charge
         # max(rated charge, resource surplus)
-        # TODO put the excess diesel charging here!
         if not self.op_params.gen_to_batt:
             self.init_frame['storage_charge_max'] = self.init_frame['dsrc_surplus'].clip(0, storage.rated_charge)
         else:
