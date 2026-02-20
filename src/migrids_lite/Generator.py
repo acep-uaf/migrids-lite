@@ -25,6 +25,7 @@ class Generator:
             warn('Warning: minimum operating load is set less than or 0.2 or 20%!')
 
         self.fuel_curve = linregress(list(fuel_usage.keys()), list(fuel_usage.values()))
+        print(str(self.fuel_curve.slope) + ' & ' + str(self.fuel_curve.intercept))
 
         # warn if the fuel curve R squared is less than 0.9
         if self.fuel_curve.rvalue**2 <= 0.9:
