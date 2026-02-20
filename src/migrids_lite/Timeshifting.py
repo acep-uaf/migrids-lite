@@ -34,6 +34,7 @@ class Timeshift:
 
         # calculating the timeseries charge by the minimum between the resource surplus and rated charge
         # max(rated charge, resource surplus)
+        # TODO put the excess diesel charging here!
         self.init_frame['storage_charge_max'] = self.init_frame['dsrc_surplus'].clip(None, storage.rated_charge)
 
         # calculating the timeseries discharge by the minimum between load minus resource surplus and rated discharge
@@ -62,7 +63,7 @@ class Timeshift:
         iter_frame = pd.DataFrame()
 
         # charging battery
-        # checks if the battery is able to be charged
+        # checks if the battery is chargeable
         charge_poss = (batt_soc - self.storage.rated_min_percent).clip(0, self.storage.rated_charge)
         re_charge = charge_poss.diff() * self.storage.rated_storage
         iter_frame['charge'] = re_charge.clip(0, self.storage.rated_charge)
@@ -83,27 +84,23 @@ class Timeshift:
 
         min_mol = min(self.powerhouse.combo_mol_caps, key=self.powerhouse.combo_mol_caps.get)
 
-        # TODO: discern between power needed and minimum diesel so that diesels can charge battery.
 
         iter_frame['diesel_out'] = iter_frame['diesel_out_poss'].clip(self.powerhouse.combo_mol_caps[min_mol], None)
+
+        # TODO: calculate this in the src limits instead of here!
         iter_frame['diesel_excess'] = -1 * (self.static_frame['electric_load'] - self.static_frame['resource_to_load'] -
                                             iter_frame['diesel_out']).clip(None, 0)
 
+
+        #  TODO: limit the total charge poss dependent on the room to charge
         if self.op_params.gen_to_batt:
-            # TODO: this needs to be limited by rated charge, then that would make things easier.
             room_charge = round((1-charge_poss-self.storage.rated_min_percent), 3)
-            print(room_charge)
+            total_charge_poss = iter_frame['diesel_excess'] + iter_frame['charge']
+            charge_poss_lim = total_charge_poss.clip(0, self.storage.rated_charge)
+            norm_charge = charge_poss_lim/self.storage.rated_storage
+            find_charge = pd.concat([room_charge, norm_charge], axis = 1)
 
-            # diesel excess normalized to storage capacity
-            de_storage_norm = iter_frame['diesel_excess']/self.storage.rated_storage
-            # renewable charge normalized to storage capacity
-            re_charge_norm = iter_frame['charge']/self.storage.rated_storage
 
-            total_charge_poss = de_storage_norm + re_charge_norm
-            charge_poss_lim = total_charge_poss.clip(0, self.storage.rated_charge/self.storage.rated_storage)
-
-            # TODO: limit the total charge poss dependent on the room to charge
-            # print(total_charge_poss)
 
         iter_frame['discharge'] = -1 * (self.static_frame['electric_load'] - self.static_frame['resource_to_load'] -
                                    iter_frame['diesel_out']).clip(0, None)
@@ -113,6 +110,7 @@ class Timeshift:
         # recalculating soc
         self.storage.reset(batt_reset)
         iter_frame['soc'] = iter_frame['charge_dis'].apply(self.storage.calc_soc)
+
 
         return iter_frame
 
