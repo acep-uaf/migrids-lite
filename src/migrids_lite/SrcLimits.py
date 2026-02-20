@@ -79,6 +79,15 @@ class SrcLimits:
         """
         self.calc_frame['dsrc_surplus'] = self.resource['resource'] - self.calc_frame['dsrc_resource_out']
 
+    def diesel_excess(self):
+        """
+        calculates excess diesel generation by subtracting the load by the minimum operating load of the powerhouse
+        :return:
+        """
+        d_excess = -1 * self.elec_load['electric_load'].subtract(self.powerhouse.min_mol)
+        self.calc_frame['diesel_excess'] = d_excess.clip(0, None)
+
+
     def calc_all(self, ess_power_cap: float, src_multi: float = 0.1, re_src_multi: float = 1):
         """
         calculates all the parameters for the SRC limited case
@@ -96,3 +105,4 @@ class SrcLimits:
         self.src_diesel_out()
         self.dsrc_resource_out()
         self.dsrc_resource_surplus()
+        self.diesel_excess()

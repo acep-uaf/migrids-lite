@@ -87,20 +87,6 @@ class Timeshift:
 
         iter_frame['diesel_out'] = iter_frame['diesel_out_poss'].clip(self.powerhouse.combo_mol_caps[min_mol], None)
 
-        # TODO: calculate this in the src limits instead of here!
-        iter_frame['diesel_excess'] = -1 * (self.static_frame['electric_load'] - self.static_frame['resource_to_load'] -
-                                            iter_frame['diesel_out']).clip(None, 0)
-
-
-        #  TODO: limit the total charge poss dependent on the room to charge
-        if self.op_params.gen_to_batt:
-            room_charge = round((1-charge_poss-self.storage.rated_min_percent), 3)
-            total_charge_poss = iter_frame['diesel_excess'] + iter_frame['charge']
-            charge_poss_lim = total_charge_poss.clip(0, self.storage.rated_charge)
-            norm_charge = charge_poss_lim/self.storage.rated_storage
-            find_charge = pd.concat([room_charge, norm_charge], axis = 1)
-
-
 
         iter_frame['discharge'] = -1 * (self.static_frame['electric_load'] - self.static_frame['resource_to_load'] -
                                    iter_frame['diesel_out']).clip(0, None)
@@ -134,7 +120,7 @@ class Timeshift:
             resid = residuals(this_soc, self.new_frame['soc'])
             resid_flag = (resid >= residual_cutoff).any()
             iter_number += 1
-            print(self.new_frame)
+            # print(self.new_frame)
 
 
         return self.new_frame, iter_number
