@@ -20,13 +20,13 @@ class TankFarm:
 
         self.totals['total_fuel_used'] = round(self.usages['timestep_fuel_used'].sum(), 3)
         self.totals['diesel_kwh_produced'] = round(self.frame['diesel_out'][1:].sum(), 3)
-        self.totals['resource_kwh_curtailed'] = round(self.frame['curtailed'][1:].sum(), 3)
+        self.totals['resource_kwh_curtailed'] = round(self.frame['resource_curtailed'][1:].sum(), 3)
 
         # since the different have different numbers of columns & the resource kwh produced calculation depends on the
         # battery, they need to be calculated differently
         if len(self.frame.columns) > 3:
             self.totals['resource_kwh_produced'] = round(self.frame['resource'][1:].sum() -
-                                                         self.frame['curtailed'].sum(), 3)
+                                                         self.frame['resource_curtailed'].sum(), 3)
         else:
             self.totals['resource_kwh_produced'] = round(self.frame['resource'][1:].sum(), 3)
 

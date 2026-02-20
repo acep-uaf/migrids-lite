@@ -35,7 +35,11 @@ class Timeshift:
         # calculating the timeseries charge by the minimum between the resource surplus and rated charge
         # max(rated charge, resource surplus)
         # TODO put the excess diesel charging here!
-        self.init_frame['storage_charge_max'] = self.init_frame['dsrc_surplus'].clip(None, storage.rated_charge)
+        if not self.op_params.gen_to_batt:
+            self.init_frame['storage_charge_max'] = self.init_frame['dsrc_surplus'].clip(0, storage.rated_charge)
+        else:
+            dsrc_plus_diesel = self.init_frame['dsrc_surplus'] + self.init_frame['diesel_excess']
+            self.init_frame['storage_charge_max'] = dsrc_plus_diesel.clip(0, storage.rated_charge)
 
         # calculating the timeseries discharge by the minimum between load minus resource surplus and rated discharge
         # max(rated discharge, load-resource)
@@ -130,12 +134,17 @@ class Timeshift:
         get the "vital" information columns from the static frame and the calculated frame
         :return:
         """
-        if not self.op_params.gen_to_batt:
-            self.vitals = pd.concat([self.static_frame[['electric_load', 'resource', 'resource_to_load']],
-                                self.new_frame[['diesel_out', 'charge_dis', 'soc']]], axis=1)
-            self.vitals['curtailed'] = (self.vitals['resource'] - self.vitals['resource_to_load'] -
-                                        self.vitals['charge_dis'].clip(0, None)).clip(0, None)
-        else:
-            print('vitals need to be calced')
+        self.vitals = pd.concat([self.static_frame[['electric_load', 'resource', 'resource_to_load']],
+                                 self.new_frame[['diesel_out', 'charge_dis', 'soc']],
+                                 self.init_frame['diesel_excess']], axis=1)
+        self.vitals['resource_curtailed'] = (self.vitals['resource'] - self.vitals['resource_to_load'] -
+                                    self.vitals['charge_dis'].clip(0, None)).clip(0, None)
+        # if not self.op_params.gen_to_batt:
+        #     self.vitals = pd.concat([self.static_frame[['electric_load', 'resource', 'resource_to_load']],
+        #                         self.new_frame[['diesel_out', 'charge_dis', 'soc']]], axis=1)
+        #     self.vitals['curtailed'] = (self.vitals['resource'] - self.vitals['resource_to_load'] -
+        #                                 self.vitals['charge_dis'].clip(0, None)).clip(0, None)
+        # else:
+        #     print('vitals need to be calced')
 
         return self.vitals
