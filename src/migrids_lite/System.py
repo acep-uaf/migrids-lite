@@ -91,7 +91,6 @@ class System:
             self.src = srcl.SrcLimits(data_in, power_house)
             self.src.calc_all(storage.rated_discharge, src_multi=oper_params.src_mult,
                               re_src_multi=oper_params.resource_src_mult)
-
             self.shift = tshift.Timeshift(storage, self.src, oper_params)
             self.shift.calc(residual_cutoff=oper_params.residual_cutoff, batt_reset=oper_params.batt_reset)
             self.shift.get_vitals()

@@ -34,7 +34,12 @@ class Timeshift:
 
         # calculating the timeseries charge by the minimum between the resource surplus and rated charge
         # max(rated charge, resource surplus)
-        self.init_frame['storage_charge_max'] = self.init_frame['dsrc_surplus'].clip(None, storage.rated_charge)
+        # TODO put the excess diesel charging here!
+        if not self.op_params.gen_to_batt:
+            self.init_frame['storage_charge_max'] = self.init_frame['dsrc_surplus'].clip(0, storage.rated_charge)
+        else:
+            dsrc_plus_diesel = self.init_frame['dsrc_surplus'] + self.init_frame['diesel_excess']
+            self.init_frame['storage_charge_max'] = dsrc_plus_diesel.clip(0, storage.rated_charge)
 
         # calculating the timeseries discharge by the minimum between load minus resource surplus and rated discharge
         # max(rated discharge, load-resource)
@@ -62,9 +67,10 @@ class Timeshift:
         iter_frame = pd.DataFrame()
 
         # charging battery
-        charge = (batt_soc - self.storage.rated_min_percent).clip(0, self.storage.rated_charge)
-        charge = charge.diff() * self.storage.rated_storage
-        iter_frame['charge'] = charge.clip(0, self.storage.rated_charge)
+        # checks if the battery is chargeable
+        charge_poss = (batt_soc - self.storage.rated_min_percent).clip(0, self.storage.rated_charge)
+        re_charge = charge_poss.diff() * self.storage.rated_storage
+        iter_frame['charge'] = re_charge.clip(0, self.storage.rated_charge)
 
         # possible discharge battery
         discharge_poss = pd.DataFrame()
@@ -82,23 +88,19 @@ class Timeshift:
 
         min_mol = min(self.powerhouse.combo_mol_caps, key=self.powerhouse.combo_mol_caps.get)
 
-        # TODO: discern between power needed and minimum diesel so that diesels can charge battery.
 
         iter_frame['diesel_out'] = iter_frame['diesel_out_poss'].clip(self.powerhouse.combo_mol_caps[min_mol], None)
 
-        if self.op_params.gen_to_batt:
-            iter_frame['discharge'] = -1 * (self.static_frame['electric_load'] - self.static_frame['resource_to_load'] -
-                                        iter_frame['diesel_out'])
-        else:
-            iter_frame['discharge'] = -1 * (self.static_frame['electric_load'] - self.static_frame['resource_to_load'] -
-                                            iter_frame['diesel_out']).clip(0, None)
 
+        iter_frame['discharge'] = -1 * (self.static_frame['electric_load'] - self.static_frame['resource_to_load'] -
+                                   iter_frame['diesel_out']).clip(0, None)
         charge_dis = pd.concat([iter_frame['charge'], iter_frame['discharge']], axis=1)
         iter_frame['charge_dis'] = charge_dis.apply(lambda x: x['charge'] if x['charge'] > 0 else x['discharge'], axis=1)
 
         # recalculating soc
         self.storage.reset(batt_reset)
         iter_frame['soc'] = iter_frame['charge_dis'].apply(self.storage.calc_soc)
+
 
         return iter_frame
 
@@ -134,8 +136,16 @@ class Timeshift:
         :return:
         """
         self.vitals = pd.concat([self.static_frame[['electric_load', 'resource', 'resource_to_load']],
-                            self.new_frame[['diesel_out', 'charge_dis', 'soc']]], axis=1)
-        self.vitals['curtailed'] = (self.vitals['resource'] - self.vitals['resource_to_load'] -
+                                 self.new_frame[['diesel_out', 'charge_dis', 'soc']],
+                                 self.init_frame['diesel_excess']], axis=1)
+        self.vitals['resource_curtailed'] = (self.vitals['resource'] - self.vitals['resource_to_load'] -
                                     self.vitals['charge_dis'].clip(0, None)).clip(0, None)
+        # if not self.op_params.gen_to_batt:
+        #     self.vitals = pd.concat([self.static_frame[['electric_load', 'resource', 'resource_to_load']],
+        #                         self.new_frame[['diesel_out', 'charge_dis', 'soc']]], axis=1)
+        #     self.vitals['curtailed'] = (self.vitals['resource'] - self.vitals['resource_to_load'] -
+        #                                 self.vitals['charge_dis'].clip(0, None)).clip(0, None)
+        # else:
+        #     print('vitals need to be calced')
 
         return self.vitals
