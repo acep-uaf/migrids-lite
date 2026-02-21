@@ -23,13 +23,18 @@ class Powerhouse:
         self.min_mol = min(self.gendict_mol.values())
         self.capacity = max(self.gendict_cap.values())
 
+        # for no loads
+        self.gendict_cap['off'] = 0
+        self.gendict_mol['off'] = 0
+
         # finding all the possible combinations of the minimum operating load
         self.combo_mol_caps = {}
         for combos in self.gencombos:
             if not combos:
-                # self.combo_mol_caps[('off',)] = 0
+                self.combo_mol_caps[('off',)] = 0
                 # skipping 0 generation. let's see how this affects downstream behavior in the future
-                continue
+                # ^ bad developer. should have considered 0 load
+                # continue
             else:
                 gen_mol_sum = 0
                 for gens in combos:
@@ -57,7 +62,6 @@ class Powerhouse:
         and the value is the loading
         :return: the dict of the fuel usage, keys are generators and values are pandas dataframes
         """
-
         pwrhouse_usage = {gen: round(self.gensets[gen].calc_diesel_usage(gen_loads[gen]), 3)
                           for gen in gen_loads}
         return pwrhouse_usage
@@ -116,13 +120,13 @@ class Powerhouse:
 
 
 if __name__ == "__main__":
-    import milite_tools as mlt
+    import migrids_lite as mlt
 
     twohundy = mlt.Generator.generic_two_hundred('twohundy')
     tenfiddy = mlt.Generator.generic_ten_fifty('tenfiddy')
     fohundy = mlt.Generator.Generator('fohundy', 400, 0.30,  {0.50: 14, 1: 28})
     pwrhouse = mlt.Powerhouse.Powerhouse((twohundy, tenfiddy, fohundy))
-    print(pwrhouse.find_mol(('twohundy', 'tenfiddy', 'fohundy')))
+    print(pwrhouse.combo_mol_caps)
 
 # {('off',): 0, ('twohundy',): 50.0, ('tenfiddy',): 262.5, ('fohundy',): 120.0, ('twohundy', 'tenfiddy'): 312.5,
 # ('twohundy', 'fohundy'): 170.0, ('tenfiddy', 'fohundy'): 382.5, ('twohundy', 'tenfiddy', 'fohundy'): 432.5}

@@ -139,12 +139,5 @@ class Timeshift:
                                  self.init_frame['diesel_excess']], axis=1)
         self.vitals['resource_curtailed'] = (self.vitals['resource'] - self.vitals['resource_to_load'] -
                                     self.vitals['charge_dis'].clip(0, None)).clip(0, None)
-        # if not self.op_params.gen_to_batt:
-        #     self.vitals = pd.concat([self.static_frame[['electric_load', 'resource', 'resource_to_load']],
-        #                         self.new_frame[['diesel_out', 'charge_dis', 'soc']]], axis=1)
-        #     self.vitals['curtailed'] = (self.vitals['resource'] - self.vitals['resource_to_load'] -
-        #                                 self.vitals['charge_dis'].clip(0, None)).clip(0, None)
-        # else:
-        #     print('vitals need to be calced')
 
         return self.vitals
