@@ -126,7 +126,7 @@ class Timeshift:
             resid = residuals(this_soc, self.new_frame['soc'])
             resid_flag = (resid >= residual_cutoff).any()
             iter_number += 1
-            print(self.new_frame)
+            # print(self.new_frame)
 
 
         return self.new_frame, iter_number

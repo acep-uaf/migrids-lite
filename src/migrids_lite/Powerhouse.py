@@ -1,4 +1,4 @@
-# import Generator as dgs
+from migrids_lite import Generator as dgs
 from itertools import combinations, chain
 
 import pandas as pd
@@ -14,9 +14,12 @@ def powerset(iterable):
     s = iterable.keys()
     return list(chain.from_iterable(combinations(s, r) for r in range(len(s)+1)))
 
+no_load = dgs.no_load()
+
 class Powerhouse:
     def __init__(self, gensets: tuple):
         self.gensets = {item.ident: item for item in gensets}
+        self.gensets['off'] = no_load
         self.gendict_mol = {item.ident:item.mol for item in gensets}
         self.gencombos = powerset(self.gendict_mol)
         self.gendict_cap = {item.ident:item.capacity for item in gensets}
@@ -88,7 +91,7 @@ class Powerhouse:
             ratios = {item:self.gendict_cap[item]/sum for item in select_combo}
         else:
             # if the generators are off there is nothing to return
-            return 0
+            return {'off': 0}
 
         pwrhouse_pow = {gen: round(eload*ratios[gen], 3) for gen in select_combo}
         return pwrhouse_pow
