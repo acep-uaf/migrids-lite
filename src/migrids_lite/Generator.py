@@ -21,18 +21,23 @@ class Generator:
         self.mol = self.mol_percent*self.capacity
 
         # operating below 20% is generally a bad idea
-        if type(mol_percent) != NoneType and mol_percent < 0.2:
+        if type(mol_percent) != NoneType and mol_percent != 0 and mol_percent < 0.2:
             warn('Warning: minimum operating load is set less than or 0.2 or 20%!')
 
-        self.fuel_curve = linregress(list(fuel_usage.keys()), list(fuel_usage.values()))
-        print(str(self.fuel_curve.slope) + ' & ' + str(self.fuel_curve.intercept))
+        if fuel_usage:
+            self.fuel_curve = linregress(list(fuel_usage.keys()), list(fuel_usage.values()))
+            # warn if the fuel curve R squared is less than 0.9
+            if self.fuel_curve.rvalue ** 2 <= 0.9:
+                warn('Warning: fuel curve R squared is less than 0.9! Unreliable outputs may occur!')
+            # exception if the fuel curve has negative slope
+            if self.fuel_curve.slope <= 0:
+                raise Exception('Error: fuel curve slope in wrong direction!')
 
-        # warn if the fuel curve R squared is less than 0.9
-        if self.fuel_curve.rvalue**2 <= 0.9:
-            warn('Warning: fuel curve R squared is less than 0.9! Unreliable outputs may occur!')
-        # exception if the fuel curve has negative slope
-        if self.fuel_curve.slope <= 0:
-             raise Exception('Error: fuel curve slope in wrong direction!')
+        else:
+            self.fuel_curve = linregress([0, 1], [0, 0])
+
+
+
 
     def calc_diesel_usage(self, e_load: float):
         if e_load > self.capacity:
@@ -64,3 +69,6 @@ def generic_ten_fifty(ident: str):
     :return: generator object
     """
     return Generator(ident, 1050, 0.25, {0.50: 35.16, 1: 68.03})
+
+def no_load():
+    return Generator(ident='off', capacity=0.0, mol_percent=0.0, fuel_usage=None)

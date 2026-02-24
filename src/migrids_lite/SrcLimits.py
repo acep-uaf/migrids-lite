@@ -37,7 +37,7 @@ class SrcLimits:
         """
         calculates an intermediate variable later to be used stored in 'dummy diesel'...
         """
-        self.calc_frame['dummy_diesel'] = self.elec_load['electric_load'] - self.resource['resource']
+        self.calc_frame['dummy_diesel'] = (self.elec_load['electric_load'] - self.resource['resource'])
 
     def src_diesel_cap_need(self, resource_src_multi: float = 1):
         """
@@ -45,8 +45,8 @@ class SrcLimits:
         :param resource_src_multi: spinning reserve multiplier in percent as decimal
         """
         unclip_diesel_cap = pd.concat([self.calc_frame['diesel_src_req'],
-                                       resource_src_multi*self.calc_frame['dummy_diesel']], axis=1).max(axis=1)
-        self.calc_frame['src_diesel_capacity'] = unclip_diesel_cap.clip(1, None)
+                                       resource_src_multi*self.calc_frame['dummy_diesel'], self.calc_frame['load_src']], axis=1).max(axis=1)
+        self.calc_frame['src_diesel_capacity'] = unclip_diesel_cap
 
     def src_diesel_cap_combo(self):
         self.calc_frame['src_diesel_combo'] = self.calc_frame['src_diesel_capacity'].apply(self.powerhouse.find_cap_combo)
@@ -61,7 +61,8 @@ class SrcLimits:
                           'instances where its value is below the minimum output of the powerhouse. '
                           'Excess electricity will be generated.', stacklevel=4)
 
-        self.calc_frame['src_diesel_output'] = self.calc_frame['dummy_diesel'].clip(self.powerhouse.min_mol, None)
+        self.calc_frame['src_diesel_output'] = self.calc_frame['dummy_diesel'].apply(lambda x: 0 if x == 0 else
+                                                max(self.powerhouse.min_mol, x))
 
     def dsrc_resource_out(self):
         """
@@ -84,7 +85,8 @@ class SrcLimits:
         calculates excess diesel generation by subtracting the load by the minimum operating load of the powerhouse
         :return:
         """
-        d_excess = -1 * self.elec_load['electric_load'].subtract(self.powerhouse.min_mol)
+        d_excess = -1 * self.elec_load['electric_load'].apply(lambda x: 0 if x == 0 else
+                                                 x - self.powerhouse.min_mol)
         self.calc_frame['diesel_excess'] = d_excess.clip(0, None)
 
 

@@ -79,20 +79,21 @@ class Timeshift:
         dis_poss = dummy_dis.apply(lambda x: 0 if x['charge'] > 0 else x['poss'], axis=1)
         iter_frame['discharge_poss'] = dis_poss
         iter_frame['diesel_out_poss'] = (self.static_frame['electric_load'] - self.static_frame['resource'] +
-                                         iter_frame['discharge_poss'])
+                                         iter_frame['discharge_poss']).clip(0, None)
 
         # diesel cap
         diesel_cap_req = pd.concat([self.init_frame['diesel_src_req'], iter_frame['diesel_out_poss']], axis=1)
         iter_frame['diesel_cap_req'] = diesel_cap_req.max(axis=1)
 
-        min_mol = min(self.powerhouse.combo_mol_caps, key=self.powerhouse.combo_mol_caps.get)
-
-
-        iter_frame['diesel_out'] = iter_frame['diesel_out_poss'].clip(self.powerhouse.combo_mol_caps[min_mol], None)
-
+        # find the diesel out possible
+        before_diesel_out = iter_frame['diesel_out_poss'].clip(self.powerhouse.min_mol, None)
+        true_diesel_out = pd.concat([before_diesel_out, self.static_frame['electric_load']], axis = 1)
+        # if there is no load, shut the diesels off, else have it at the mol
+        iter_frame['diesel_out'] = true_diesel_out.apply(lambda x: x['diesel_out_poss'] if x['electric_load'] > 0
+                                                        else 0, axis=1)
 
         iter_frame['discharge'] = -1 * (self.static_frame['electric_load'] - self.static_frame['resource_to_load'] -
-                                   iter_frame['diesel_out']).clip(0, None)
+                                   iter_frame['diesel_out']).clip(0, self.storage.rated_discharge)
         charge_dis = pd.concat([iter_frame['charge'], iter_frame['discharge']], axis=1)
         iter_frame['charge_dis'] = charge_dis.apply(lambda x: x['charge'] if x['charge'] > 0 else x['discharge'], axis=1)
 
@@ -110,6 +111,7 @@ class Timeshift:
         self.static_frame['resource'] = self.resource
         self.static_frame['resource_to_load'] = self.init_frame['dsrc_resource_out']
 
+        # print(self.init_frame)
         init_soc = self.init_frame['storage_requested'].apply(self.storage.calc_soc)
         # print(init_soc)
 
@@ -139,12 +141,5 @@ class Timeshift:
                                  self.init_frame['diesel_excess']], axis=1)
         self.vitals['resource_curtailed'] = (self.vitals['resource'] - self.vitals['resource_to_load'] -
                                     self.vitals['charge_dis'].clip(0, None)).clip(0, None)
-        # if not self.op_params.gen_to_batt:
-        #     self.vitals = pd.concat([self.static_frame[['electric_load', 'resource', 'resource_to_load']],
-        #                         self.new_frame[['diesel_out', 'charge_dis', 'soc']]], axis=1)
-        #     self.vitals['curtailed'] = (self.vitals['resource'] - self.vitals['resource_to_load'] -
-        #                                 self.vitals['charge_dis'].clip(0, None)).clip(0, None)
-        # else:
-        #     print('vitals need to be calced')
 
         return self.vitals

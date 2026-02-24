@@ -1,4 +1,4 @@
-# import Generator as dgs
+from migrids_lite import Generator as dgs
 from itertools import combinations, chain
 
 import pandas as pd
@@ -14,21 +14,30 @@ def powerset(iterable):
     s = iterable.keys()
     return list(chain.from_iterable(combinations(s, r) for r in range(len(s)+1)))
 
+no_load = dgs.no_load()
+
 class Powerhouse:
     def __init__(self, gensets: tuple):
         self.gensets = {item.ident: item for item in gensets}
+        self.gensets['off'] = no_load
         self.gendict_mol = {item.ident:item.mol for item in gensets}
         self.gencombos = powerset(self.gendict_mol)
         self.gendict_cap = {item.ident:item.capacity for item in gensets}
         self.min_mol = min(self.gendict_mol.values())
         self.capacity = max(self.gendict_cap.values())
 
+        # for no loads
+        self.gendict_cap['off'] = 0
+        self.gendict_mol['off'] = 0
+
         # finding all the possible combinations of the minimum operating load
         self.combo_mol_caps = {}
         for combos in self.gencombos:
             if not combos:
-                # self.combo_mol_caps[('off',)] = 0
+                self.combo_mol_caps[('off',)] = 0
                 # skipping 0 generation. let's see how this affects downstream behavior in the future
+                # ^ bad developer. should have considered 0 load
+                # adding zero makes finding the min combo act weird and messes up the battery
                 continue
             else:
                 gen_mol_sum = 0
@@ -57,7 +66,6 @@ class Powerhouse:
         and the value is the loading
         :return: the dict of the fuel usage, keys are generators and values are pandas dataframes
         """
-
         pwrhouse_usage = {gen: round(self.gensets[gen].calc_diesel_usage(gen_loads[gen]), 3)
                           for gen in gen_loads}
         return pwrhouse_usage
@@ -83,7 +91,7 @@ class Powerhouse:
             ratios = {item:self.gendict_cap[item]/sum for item in select_combo}
         else:
             # if the generators are off there is nothing to return
-            return 0
+            return {'off': 0}
 
         pwrhouse_pow = {gen: round(eload*ratios[gen], 3) for gen in select_combo}
         return pwrhouse_pow
@@ -97,6 +105,8 @@ class Powerhouse:
         """
         if pd.isna(cap_need):
             return None
+        elif cap_need == 0:
+            return ('off',)
 
         try:
             cap_above = {cap:combo for (cap, combo) in self.combo_caps.items() if cap >= cap_need}
@@ -116,13 +126,13 @@ class Powerhouse:
 
 
 if __name__ == "__main__":
-    import milite_tools as mlt
+    import migrids_lite as mlt
 
     twohundy = mlt.Generator.generic_two_hundred('twohundy')
     tenfiddy = mlt.Generator.generic_ten_fifty('tenfiddy')
     fohundy = mlt.Generator.Generator('fohundy', 400, 0.30,  {0.50: 14, 1: 28})
     pwrhouse = mlt.Powerhouse.Powerhouse((twohundy, tenfiddy, fohundy))
-    print(pwrhouse.find_mol(('twohundy', 'tenfiddy', 'fohundy')))
+    print(pwrhouse.combo_mol_caps)
 
 # {('off',): 0, ('twohundy',): 50.0, ('tenfiddy',): 262.5, ('fohundy',): 120.0, ('twohundy', 'tenfiddy'): 312.5,
 # ('twohundy', 'fohundy'): 170.0, ('tenfiddy', 'fohundy'): 382.5, ('twohundy', 'tenfiddy', 'fohundy'): 432.5}
