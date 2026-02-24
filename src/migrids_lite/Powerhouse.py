@@ -34,7 +34,8 @@ class Powerhouse:
                 self.combo_mol_caps[('off',)] = 0
                 # skipping 0 generation. let's see how this affects downstream behavior in the future
                 # ^ bad developer. should have considered 0 load
-                # continue
+                # adding zero makes finding the min combo act weird and messes up the battery
+                continue
             else:
                 gen_mol_sum = 0
                 for gens in combos:
@@ -101,6 +102,8 @@ class Powerhouse:
         """
         if pd.isna(cap_need):
             return None
+        elif cap_need == 0:
+            return ('off',)
 
         try:
             cap_above = {cap:combo for (cap, combo) in self.combo_caps.items() if cap >= cap_need}

@@ -79,7 +79,7 @@ class Timeshift:
         dis_poss = dummy_dis.apply(lambda x: 0 if x['charge'] > 0 else x['poss'], axis=1)
         iter_frame['discharge_poss'] = dis_poss
         iter_frame['diesel_out_poss'] = (self.static_frame['electric_load'] - self.static_frame['resource'] +
-                                         iter_frame['discharge_poss'])
+                                         iter_frame['discharge_poss']).clip(0, None)
 
         # diesel cap
         diesel_cap_req = pd.concat([self.init_frame['diesel_src_req'], iter_frame['diesel_out_poss']], axis=1)
@@ -110,8 +110,9 @@ class Timeshift:
         self.static_frame['resource'] = self.resource
         self.static_frame['resource_to_load'] = self.init_frame['dsrc_resource_out']
 
+        print(self.init_frame)
         init_soc = self.init_frame['storage_requested'].apply(self.storage.calc_soc)
-        # print(init_soc)
+        print(init_soc)
 
         self.new_frame = self.iterate(init_soc, batt_reset=batt_reset)
         resid = residuals(init_soc, self.new_frame['soc'])
@@ -124,7 +125,7 @@ class Timeshift:
             resid = residuals(this_soc, self.new_frame['soc'])
             resid_flag = (resid >= residual_cutoff).any()
             iter_number += 1
-            # print(self.new_frame)
+            print(self.new_frame)
 
 
         return self.new_frame, iter_number
