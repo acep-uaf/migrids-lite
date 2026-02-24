@@ -85,17 +85,15 @@ class Timeshift:
         diesel_cap_req = pd.concat([self.init_frame['diesel_src_req'], iter_frame['diesel_out_poss']], axis=1)
         iter_frame['diesel_cap_req'] = diesel_cap_req.max(axis=1)
 
-        min_gen_mol = sorted(self.powerhouse.combo_mol_caps.items(), key=lambda x: x[1])[1]
-        # gen_mins = sorted(self.powerhouse.combo_mol_caps.values())[1]
-        # print(min_gen_mol[0])
-        # min_mol = min(self.powerhouse.combo_mol_caps, key=self.powerhouse.combo_mol_caps.get)
-
-
-        iter_frame['diesel_out'] = iter_frame['diesel_out_poss'].clip(self.powerhouse.combo_mol_caps[min_gen_mol[0]], None)
-
+        # find the diesel out possible
+        before_diesel_out = iter_frame['diesel_out_poss'].clip(self.powerhouse.min_mol, None)
+        true_diesel_out = pd.concat([before_diesel_out, self.static_frame['electric_load']], axis = 1)
+        # if there is no load, shut the diesels off, else have it at the mol
+        iter_frame['diesel_out'] = true_diesel_out.apply(lambda x: x['diesel_out_poss'] if x['electric_load'] > 0
+                                                        else 0, axis=1)
 
         iter_frame['discharge'] = -1 * (self.static_frame['electric_load'] - self.static_frame['resource_to_load'] -
-                                   iter_frame['diesel_out']).clip(0, None)
+                                   iter_frame['diesel_out']).clip(0, self.storage.rated_discharge)
         charge_dis = pd.concat([iter_frame['charge'], iter_frame['discharge']], axis=1)
         iter_frame['charge_dis'] = charge_dis.apply(lambda x: x['charge'] if x['charge'] > 0 else x['discharge'], axis=1)
 

@@ -95,6 +95,6 @@ class System:
             self.shift.calc(residual_cutoff=oper_params.residual_cutoff, batt_reset=oper_params.batt_reset)
             self.shift.get_vitals()
 
-            # self.vitals = tanks.TankFarm(power_house, self.shift.vitals)
+            self.vitals = tanks.TankFarm(power_house, self.shift.vitals)
 
         else: raise Exception('unrecognized mode')
