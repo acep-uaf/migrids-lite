@@ -8,6 +8,6 @@ code/.idea/misc.xml
 .venv/
 code/.idea/
 .ipynb_checkpoints
-.idea
+/.idea
 /.idea/*
 
