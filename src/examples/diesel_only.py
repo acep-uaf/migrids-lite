@@ -21,5 +21,5 @@ power_house = mlt.Powerhouse.Powerhouse((four_hund,))
 diesel_src = mlt.System.System(electric_load, power_house, 'd')
 
 # print some useful things
-print(diesel_src.src.frame)
-print(diesel_src.fuel_usages.totals)
+print(diesel_src.vitals.frame)
+print(diesel_src.vitals.totals)

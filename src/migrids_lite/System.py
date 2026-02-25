@@ -51,7 +51,8 @@ class System:
             self.src.vitals = pd.DataFrame()
             self.src.vitals['diesel_out'] = self.src.calc_frame['src_diesel_output']
             self.src.vitals['resource'] = self.src.calc_frame['dsrc_resource_out']
-            self.src.vitals['curtailed'] = self.src.calc_frame['dsrc_surplus']
+            self.src.vitals['resource_curtailed'] = self.src.calc_frame['dsrc_surplus']
+            self.src.vitals['diesel_excess'] = self.src.calc_frame['diesel_excess']
 
             self.vitals = tanks.TankFarm(power_house, self.src.vitals)
 
@@ -72,7 +73,8 @@ class System:
             self.src.vitals = pd.DataFrame()
             self.src.vitals['diesel_out'] = self.src.calc_frame['src_diesel_output']
             self.src.vitals['resource'] = self.src.calc_frame['dsrc_resource_out']
-            self.src.vitals['curtailed'] = self.src.calc_frame['dsrc_surplus']
+            self.src.vitals['resource_curtailed'] = self.src.calc_frame['dsrc_surplus']
+            self.src.vitals['diesel_excess'] = self.src.calc_frame['diesel_excess']
 
             self.vitals = tanks.TankFarm(power_house, self.src.vitals)
 
