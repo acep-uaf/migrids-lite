@@ -5,6 +5,9 @@ MiGRIDS Lite is a Python package that is used to model hourly electricity usage 
 
 This software is meant to be a first order estimation of the effect of adding renewable energy and storage. For more information regarding how this is calculated, please see the [wiki](https://github.com/acep-uaf/migrids-lite/wiki).
 
+## What's new in version 1.2?
+The previous version only worked with electric loads above the minimum operating load of the powerhouse. This new version rectifies that and allows for the option of having excess diesel energy charge the storage. It also accepts 0 load scenarios.
+
 ## MiGRIDS Lite History
 
 MiGRIDS was developed by a research team at the University of Alaska Fairbanks [Alaska Center for
