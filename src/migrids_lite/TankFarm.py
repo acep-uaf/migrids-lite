@@ -33,7 +33,9 @@ class TankFarm:
 
         # get the total usages for each generator
         for generators in self.kraftwerk.gensets:
+            gen_kwh = self.usages['gen_power'].apply(lambda x: x[generators] if generators in x else 0)
             gen_columns = self.usages['gen_fuel_used'].apply(lambda x: x[generators] if generators in x else 0)
             gen_hours = self.usages['gen_fuel_used'].apply(lambda x: 1 if generators in x else 0)
+            self.totals['total_' + generators + '_kwh'] = round(gen_kwh.sum(), 3)
             self.totals['total_' + generators + '_fuel'] = round(gen_columns.sum(), 3)
             self.totals['total_' + generators + '_hours'] = round(gen_hours.sum(), 3)
