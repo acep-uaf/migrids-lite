@@ -8,6 +8,8 @@ This software is meant to be a first order estimation of the effect of adding re
 ## What's new in version 1.2?
 The previous version only worked with electric loads above the minimum operating load of the powerhouse. This new version rectifies that and allows for the option of having excess diesel energy charge the storage. It also accepts 0 load scenarios.
 
+Finally, it calculates more comprehensive statistics such as per generator kilowatt hour totals and diesel excess.
+
 ## MiGRIDS Lite History
 
 MiGRIDS was developed by a research team at the University of Alaska Fairbanks [Alaska Center for
