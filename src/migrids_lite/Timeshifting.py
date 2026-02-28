@@ -71,8 +71,8 @@ class Timeshift:
         re_charge = charge_poss.diff() * self.storage.rated_storage
         iter_frame['charge'] = re_charge.clip(0, self.storage.rated_charge)
         if self.op_params.gen_to_batt:
-            iter_frame['diesel_waste'] = (self.init_frame['diesel_excess']-iter_frame['charge']).clip(0, None)
-
+            unrounded = (self.init_frame['diesel_excess']-iter_frame['charge']).clip(0, None)
+            iter_frame['diesel_waste'] = round(unrounded, 3)
 
         # possible discharge battery
         discharge_poss = pd.DataFrame()
@@ -139,9 +139,14 @@ class Timeshift:
         get the "vital" information columns from the static frame and the calculated frame
         :return:
         """
-        self.vitals = pd.concat([self.static_frame[['electric_load', 'resource', 'resource_to_load']],
-                                 self.new_frame[['diesel_out', 'charge_dis', 'soc']],
-                                 self.init_frame['diesel_excess'], self.new_frame['diesel_waste']], axis=1)
+        if self.op_params.gen_to_batt:
+            self.vitals = pd.concat([self.static_frame[['electric_load', 'resource', 'resource_to_load']],
+                                    self.new_frame[['diesel_out', 'charge_dis', 'soc']],
+                                    self.init_frame['diesel_excess'], self.new_frame['diesel_waste']], axis=1)
+        else:
+            self.vitals = pd.concat([self.static_frame[['electric_load', 'resource', 'resource_to_load']],
+                                     self.new_frame[['diesel_out', 'charge_dis', 'soc']],
+                                     self.init_frame['diesel_excess']], axis=1)
 
         # TODO make this resource only
         self.vitals['resource_curtailed'] = (self.vitals['resource'] - self.vitals['resource_to_load'] -
