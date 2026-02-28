@@ -37,7 +37,6 @@ class Timeshift:
         if not self.op_params.gen_to_batt:
             self.init_frame['storage_charge_max'] = self.init_frame['dsrc_surplus'].clip(0, storage.rated_charge)
         else:
-            # TODO keep track of diesel excess to battery
             dsrc_plus_diesel = self.init_frame['dsrc_surplus'] + self.init_frame['diesel_excess']
             self.init_frame['storage_charge_max'] = dsrc_plus_diesel.clip(0, storage.rated_charge)
 
@@ -71,6 +70,9 @@ class Timeshift:
         charge_poss = (batt_soc - self.storage.rated_min_percent).clip(0, self.storage.rated_charge)
         re_charge = charge_poss.diff() * self.storage.rated_storage
         iter_frame['charge'] = re_charge.clip(0, self.storage.rated_charge)
+        if self.op_params.gen_to_batt:
+            iter_frame['diesel_waste'] = self.init_frame['diesel_excess']-iter_frame['charge']
+
 
         # possible discharge battery
         discharge_poss = pd.DataFrame()
@@ -139,7 +141,7 @@ class Timeshift:
         """
         self.vitals = pd.concat([self.static_frame[['electric_load', 'resource', 'resource_to_load']],
                                  self.new_frame[['diesel_out', 'charge_dis', 'soc']],
-                                 self.init_frame['diesel_excess']], axis=1)
+                                 self.init_frame['diesel_excess'], self.new_frame['diesel_waste']], axis=1)
 
         # TODO make this resource only
         self.vitals['resource_curtailed'] = (self.vitals['resource'] - self.vitals['resource_to_load'] -
