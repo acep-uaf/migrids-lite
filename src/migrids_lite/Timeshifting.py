@@ -71,7 +71,7 @@ class Timeshift:
         re_charge = charge_poss.diff() * self.storage.rated_storage
         iter_frame['charge'] = re_charge.clip(0, self.storage.rated_charge)
         if self.op_params.gen_to_batt:
-            iter_frame['diesel_waste'] = self.init_frame['diesel_excess']-iter_frame['charge']
+            iter_frame['diesel_waste'] = (self.init_frame['diesel_excess']-iter_frame['charge']).clip(0, None)
 
 
         # possible discharge battery
