@@ -34,4 +34,4 @@ gen_shifting = mlt.System.System(electric_load, power_house, 's', storage=batter
 
 print(gen_shifting.vitals.frame)
 print(gen_shifting.vitals.totals)
-print(gen_shifting.vitals.usages)
+# print(gen_shifting.vitals.usages)
