@@ -19,6 +19,7 @@ pd.set_option('display.width', None)
 four_hund = mlt.Generator.Generator('four_hund', 400, 0.30, {0.50: 14, 1.00: 28})
 power_house = mlt.Powerhouse.Powerhouse((four_hund,))
 
+# 0.8 is due to the spinning reserve
 electric = [randrange(int(power_house.min_mol), int(power_house.capacity*0.8)) for x in range(0, 24)]
 solar = [randrange(0, 400) for x in range(0, 24)]
 
@@ -36,6 +37,7 @@ def test_total_energy_timestep():
     make sure the load is being met by the generator, resource, and battery for each timestep
     :return:
     """
+    # TODO: make this diesel excess safe
 
     # masks the column for only discharge at makes it positive, so that generator output + storage discharge + resource
     # should equal the load
@@ -54,6 +56,7 @@ def test_total_gen_energy_run():
     make sure the total gen kWh is the same as the vitals.totals
     :return:
     """
+    # TODO: make this diesel excess safe
     frame_diesel_total = gen_shifting.vitals.frame['diesel_out'].sum()
     totals_diesel_total = gen_shifting.vitals.totals['diesel_kwh_produced']
 
@@ -64,6 +67,7 @@ def test_total_resource_run():
     make the total resource kW is accounted for at each timestep
     :return:
     """
+
     diesel_to_batt = gen_shifting.vitals.frame['diesel_excess'] - gen_shifting.vitals.frame['diesel_waste']
     resource_to_batt = gen_shifting.vitals.frame['charge_dis'].clip(0, None) - diesel_to_batt
     resource_balance = (gen_shifting.vitals.frame['resource_to_load'] + resource_to_batt +

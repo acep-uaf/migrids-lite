@@ -99,7 +99,7 @@ class Powerhouse:
 
     def find_cap_combo(self, cap_need: int):
         """
-        find the generator combination needed given capacity
+        find the generator combination needed given capacity or spinning reserve
         :param cap_need: generation capacity needed
         :return: generator combination
         """
@@ -113,7 +113,7 @@ class Powerhouse:
             gen_combo = cap_above[min(cap_above.keys(), key = lambda key: abs(key-cap_need))]
             return gen_combo
         except:
-            raise Exception('Invalid capacity: requested capacity is outside of powerhouse capacity') from None
+            raise Exception('Invalid capacity: requested load or spinning reserve capacity is outside of powerhouse capacity') from None
 
     def find_mol(self, combo: tuple):
         """

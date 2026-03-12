@@ -34,6 +34,7 @@ class Generator:
                 raise Exception('Error: fuel curve slope in wrong direction!')
 
         else:
+            # this is 'off' generator
             self.fuel_curve = linregress([0, 1], [0, 0])
 
 

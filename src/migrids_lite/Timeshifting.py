@@ -150,7 +150,7 @@ class Timeshift:
 
         diesel_to_batt = self.vitals['diesel_excess'] - self.vitals['diesel_waste']
         unround_kurt = (self.vitals['resource'] - self.vitals['resource_to_load'] -
-                                             (self.vitals['charge_dis'].clip(0, None) - diesel_to_batt)).clip(0, None)
+                                             (self.vitals['charge_dis'].clip(0, None) + diesel_to_batt)).clip(0, None)
         # get rounded, kurt
         self.vitals['resource_curtailed'] = round(unround_kurt, 3)
 
