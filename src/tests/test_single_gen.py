@@ -19,11 +19,12 @@ pd.set_option('display.width', None)
 four_hund = mlt.Generator.Generator('four_hund', 400, 0.30, {0.50: 14, 1.00: 28})
 power_house = mlt.Powerhouse.Powerhouse((four_hund,))
 
-electric = [randrange(int(power_house.min_mol), int(power_house.capacity)) for x in range(0, 24)]
+electric = [randrange(int(power_house.min_mol), int(power_house.capacity*0.8)) for x in range(0, 24)]
 solar = [randrange(0, 400) for x in range(0, 24)]
 
 electric_load = mlt.EnergyType.EnergyType('electric_load', pd.DataFrame(electric))
 solar_energy = mlt.EnergyType.EnergyType('resource', pd.DataFrame(solar))
+
 
 battery = mlt.Storage.Storage('example_batt', 50, 100, 100, 0.3)
 
@@ -58,9 +59,16 @@ def test_total_gen_energy_run():
 
     assert totals_diesel_total == pytest.approx(frame_diesel_total)
 
-# def test_total_resource_run():
-#     """
-#     make the total resource kWh used is the same as the vitals.totals
-#     :return:
-#     """
-#
+def test_total_resource_run():
+    """
+    make the total resource kW is accounted for at each timestep
+    :return:
+    """
+    diesel_to_batt = gen_shifting.vitals.frame['diesel_excess'] - gen_shifting.vitals.frame['diesel_waste']
+    resource_to_batt = gen_shifting.vitals.frame['charge_dis'].clip(0, None) - diesel_to_batt
+    resource_balance = (gen_shifting.vitals.frame['resource_to_load'] + resource_to_batt +
+         gen_shifting.vitals.frame['resource_curtailed'])
+    resource_balance= round(resource_balance, 3)
+
+    assert pd.testing.assert_series_equal(gen_shifting.vitals.frame['resource'], resource_balance.fillna(0), check_names=False,
+                                          check_dtype=False) is None
