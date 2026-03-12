@@ -72,7 +72,7 @@ def test_total_resource_run():
     resource_to_batt = gen_shifting.vitals.frame['charge_dis'].clip(0, None) - diesel_to_batt
     resource_balance = (gen_shifting.vitals.frame['resource_to_load'] + resource_to_batt +
          gen_shifting.vitals.frame['resource_curtailed'])
-    resource_balance= round(resource_balance, 3)
+    resource_balance = round(resource_balance, 3)
 
-    assert pd.testing.assert_series_equal(gen_shifting.vitals.frame['resource'], resource_balance.fillna(0), check_names=False,
-                                          check_dtype=False) is None
+    assert pd.testing.assert_series_equal(gen_shifting.vitals.frame['resource'].astype(np.float64), resource_balance.fillna(0),
+                                          check_names=False) is None
