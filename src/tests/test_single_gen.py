@@ -20,7 +20,8 @@ four_hund = mlt.Generator.Generator('four_hund', 400, 0.30, {0.50: 14, 1.00: 28}
 power_house = mlt.Powerhouse.Powerhouse((four_hund,))
 
 # 0.8 is due to the spinning reserve
-electric = [randrange(int(power_house.min_mol), int(power_house.capacity*0.8)) for x in range(0, 24)]
+# electric = [randrange(int(power_house.min_mol), int(power_house.capacity*0.8)) for x in range(0, 24)]
+electric = [randrange(0, int(power_house.capacity*0.8)) for x in range(0, 24)]
 solar = [randrange(0, 400) for x in range(0, 24)]
 
 electric_load = mlt.EnergyType.EnergyType('electric_load', pd.DataFrame(electric))
@@ -37,7 +38,6 @@ def test_total_energy_timestep():
     make sure the load is being met by the generator, resource, and battery for each timestep
     :return:
     """
-    # TODO: make this diesel excess safe
 
     # masks the column for only discharge at makes it positive, so that generator output + storage discharge + resource
     # should equal the load
@@ -45,8 +45,9 @@ def test_total_energy_timestep():
     discharge = -1 * gen_shifting.vitals.frame['charge_dis'].mask(gen_shifting.vitals.frame['charge_dis'] > 0).fillna(0)
     resource_to_load = gen_shifting.vitals.frame['resource_to_load']
     diesel_out = gen_shifting.vitals.frame['diesel_out']
+    diesel_excess = gen_shifting.vitals.frame['diesel_excess']
 
-    energy_to_load = discharge + resource_to_load + diesel_out
+    energy_to_load = discharge + resource_to_load + diesel_out - diesel_excess
     load = gen_shifting.vitals.frame['electric_load'].astype(np.float64)
 
     assert pd.testing.assert_series_equal(load, energy_to_load.fillna(0), check_names=False) is None
@@ -56,7 +57,6 @@ def test_total_gen_energy_run():
     make sure the total gen kWh is the same as the vitals.totals
     :return:
     """
-    # TODO: make this diesel excess safe
     frame_diesel_total = gen_shifting.vitals.frame['diesel_out'].sum()
     totals_diesel_total = gen_shifting.vitals.totals['diesel_kwh_produced']
 
@@ -64,7 +64,7 @@ def test_total_gen_energy_run():
 
 def test_total_resource_run():
     """
-    make the total resource kW is accounted for at each timestep
+    make the total resource kWh is accounted for at each timestep
     :return:
     """
 
