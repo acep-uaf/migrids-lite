@@ -23,9 +23,9 @@ class TankFarm:
         self.totals['resource_kwh_curtailed'] = round(self.frame['resource_curtailed'][1:].sum(), 3)
         self.totals['diesel_excess'] = round(self.frame['diesel_excess'][1:].sum(), 3)
 
-        # since the different have different numbers of columns & the resource kwh produced calculation depends on the
+        # the resource kwh produced calculation depends on the
         # battery, they need to be calculated differently
-        if len(self.frame.columns) > 3:
+        if 'soc' in self.frame.columns:
             self.totals['resource_kwh_produced'] = round(self.frame['resource'][1:].sum() -
                                                          self.frame['resource_curtailed'].sum(), 3)
         else:
