@@ -21,7 +21,7 @@ class EnergyType:
         # start everything from 0
         if data is not None:
             self.data = pd.concat([pd.DataFrame({0, 0}), data], ignore_index=True)
-            self.data = self.data.multiply(multiplier)
+            self.data = self.data * multiplier
         else:
             # empty dataframe to filled in later with get data
             self.data = pd.DataFrame()
@@ -38,7 +38,7 @@ class EnergyType:
         :param multiplier: multiply the load by this much
         """
         raw_data = pd.read_csv(data_path, header=None, names=[data_name + '_' + str(self.energy_type)])
-        raw_data = raw_data.multiply(multiplier)
+        raw_data = raw_data * multiplier
         zero_init = pd.concat([pd.DataFrame([0], [0], [data_name + '_' + str(self.energy_type)]), raw_data],
                               ignore_index=True)
         self.data = pd.concat([self.data, zero_init], axis=1)
@@ -49,7 +49,7 @@ class EnergyType:
     def sum_data(self):
         """
         sum data
-        :return: summed electrical load in kW as dataframe column
+        :return: summed electrical load or resource in kW as dataframe column
         """
         self.data[str(self.energy_type)] = self.data.sum(axis=1)
 

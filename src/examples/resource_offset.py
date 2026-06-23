@@ -12,7 +12,9 @@ all_data = pd.read_csv('example_data.tab', delimiter='\t')
 electric_load = mlt.EnergyType.EnergyType('electric_load', all_data['load'])
 
 # get the resource available
-solar_energy = mlt.EnergyType.EnergyType('resource', all_data['solar_energy'])
+resources = mlt.EnergyType.EnergyType('resource', all_data[['solar_energy', 'random_energy']])
+resources.sum_data()
+# print(resources.data)
 
 # create a generator, this one is 400 kW
 four_hund = mlt.Generator.Generator('four_hund', 400, 0.30, {0.50: 14, 1.00: 28})
@@ -20,7 +22,7 @@ four_hund = mlt.Generator.Generator('four_hund', 400, 0.30, {0.50: 14, 1.00: 28}
 # build the power house, this is required even if there's only 1 generator
 power_house = mlt.Powerhouse.Powerhouse((four_hund,))
 
-resource_offset = mlt.System.System(electric_load, power_house, 'r', resource_input=solar_energy)
+resource_offset = mlt.System.System(electric_load, power_house, 'r', resource_input=resources)
 
 # print some useful things
 print(resource_offset.vitals.frame)

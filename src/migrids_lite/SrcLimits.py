@@ -12,26 +12,26 @@ class SrcLimits:
         self.calc_frame = pd.DataFrame()
         self.powerhouse = power_house
 
-    def poss_res_import(self):
-        """
-        calculates the possible resource imports and creates 'poss_grid_import' column
-        """
-        self.calc_frame['poss_grid_import'] = pd.concat([self.elec_load['electric_load'],
-                                                          self.resource['resource']], axis = 1).min(axis = 1)
+    # def poss_res_import(self):
+    #     """
+    #     calculates the possible resource imports and creates 'poss_grid_import' column
+    #     """
+    #     self.calc_frame['poss_grid_import'] = pd.concat([self.elec_load['electric_load'],
+    #                                                       self.resource['resource']], axis = 1).min(axis = 1)
 
     def load_src(self, src_multiplier: float = 0.1):
         """
         calculates the load spinning reserve capacity and creates 'load_src' column
         :param src_multiplier: the spinning reserve capacity in percentage as decimal
         """
-        self.calc_frame['load_src'] = self.elec_load['electric_load'].multiply(src_multiplier+1)
+        self.calc_frame['load_src'] = self.elec_load['electric_load'] * (src_multiplier+1)
 
     def diesel_src_req(self, ess_power_cap: float):
         """
         calculates the diesel generator spinning reserve capacity and creates 'diesel_src_req' column
         :param ess_power_cap: power output capacity of the energy storage system in kW
         """
-        self.calc_frame['diesel_src_req'] = self.calc_frame['load_src'].subtract(ess_power_cap)
+        self.calc_frame['diesel_src_req'] = self.calc_frame['load_src'] - ess_power_cap
 
     def dummy_diesel(self):
         """
@@ -98,7 +98,7 @@ class SrcLimits:
         :param re_src_multi: resource spinning reserve multiplier in percentage as decimal
         :return:
         """
-        self.poss_res_import()
+        # self.poss_res_import()
         self.load_src(src_multi)
         self.diesel_src_req(ess_power_cap)
         self.dummy_diesel()

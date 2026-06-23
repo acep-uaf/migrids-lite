@@ -7,6 +7,7 @@ pd.set_option('display.width', None)
 
 # get all the data
 all_data = pd.read_csv('example_data.tab', delimiter='\t')
+print(all_data)
 
 # get the electric load from the data
 electric_load = mlt.EnergyType.EnergyType('electric_load', all_data['load'])
