@@ -13,6 +13,7 @@ electric_load = mlt.EnergyType.EnergyType('electric_load', all_data['load'])
 
 # get the resource available
 resources = mlt.EnergyType.EnergyType('resource', all_data[['solar_energy', 'random_energy']])
+# resources = mlt.EnergyType.EnergyType('resource', all_data['solar_energy'])
 resources.sum_data()
 # print(resources.data)
 

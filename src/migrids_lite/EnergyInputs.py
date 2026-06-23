@@ -5,8 +5,22 @@ class EnergyInputs:
         self.resource = pd.DataFrame()
         self.electric_load = pd.DataFrame()
         if (first_input.energy_type == 'resource') and (second_input.energy_type == 'electric_load'):
-            self.resource['resource'] = first_input.data
-            self.electric_load['electric_load'] = second_input.data
+            # if there is only one column, just use that column
+            if first_input.data.shape[1] == 1:
+                self.resource['resource'] = first_input.data
+            else:
+                # if there's multiple columns, try to find the resource column
+                try:
+                    self.resource['resource'] = first_input.data['resource']
+                except: raise Exception("Error: no resource column found!")
+
+            if second_input.data.shape[1] == 1:
+                self.electric_load['electric_load'] = second_input.data
+            else:
+                try:
+                    self.electric_load['electric_load'] = second_input.data['electric_load']
+                except: raise Exception("Error: no load column found!")
+
         elif (first_input.energy_type == 'electric_load') and (second_input.energy_type == 'resource'):
             self.resource['resource'] = second_input.data
             self.electric_load['electric_load'] = first_input.data
