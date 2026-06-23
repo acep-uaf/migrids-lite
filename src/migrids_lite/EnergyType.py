@@ -48,7 +48,7 @@ class EnergyType:
 
     def sum_data(self):
         """
-        sum data
+        sum data into 'resources' or 'electrical load' column
         :return: summed electrical load or resource in kW as dataframe column
         """
         self.data[str(self.energy_type)] = self.data.sum(axis=1)
@@ -60,3 +60,14 @@ class EnergyType:
         :return: set the dataframe
         """
         self.data = pd.DataFrame([0 for x in range(0, length)])
+
+    def combine_data(self, modifier: dict):
+        """
+        combine the data by a multiplying individual columns by a scalar then summing the columns
+        :param modifier: dict of the column names as keys, with the values being the multiplier
+        :return: 'resource' column of the data
+        """
+        temp_frame = pd.DataFrame()
+        for key, value in modifier.items():
+            temp_frame[key + '_new'] = self.data[key] * value
+        self.data[str(self.energy_type)] = temp_frame.sum(axis=1)

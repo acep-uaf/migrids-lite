@@ -14,7 +14,7 @@ electric_load = mlt.EnergyType.EnergyType('electric_load', all_data['load'])
 # get the resource available
 resources = mlt.EnergyType.EnergyType('resource', all_data[['solar_energy', 'random_energy']])
 # resources = mlt.EnergyType.EnergyType('resource', all_data['solar_energy'])
-resources.sum_data()
+resources.combine_data({'solar_energy': 1, 'random_energy': 0.8})
 # print(resources.data)
 
 # create a generator, this one is 400 kW

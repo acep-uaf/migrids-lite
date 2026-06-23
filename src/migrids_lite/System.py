@@ -63,7 +63,7 @@ class System:
             try:
                 data_in = e_inp.EnergyInputs(resource_input, load_input)
             except:
-                raise Exception('resource input error, make sure that the resource input is properly imported')
+                raise Exception('input error, make sure that the resource and/or load input is properly imported')
 
             self.src = srcl.SrcLimits(data_in, power_house)
             self.src.calc_all(0, src_multi=oper_params.src_mult,
@@ -88,7 +88,7 @@ class System:
             try:
                 data_in = e_inp.EnergyInputs(resource_input, load_input)
             except:
-                raise Exception('resource input error, make sure that the resource input is properly imported')
+                raise Exception('input error, make sure that the resource and/or load input is properly imported')
 
             self.src = srcl.SrcLimits(data_in, power_house)
             self.src.calc_all(storage.rated_discharge, src_multi=oper_params.src_mult,
