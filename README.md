@@ -10,6 +10,15 @@ The previous version only worked with electric loads above the minimum operating
 
 Finally, it calculates more comprehensive statistics such as per generator kilowatt hour totals and diesel excess.
 
+## What's new in version 1.3?
+The inputs for both load and resource now accept multidimensional dataframes, which allow for use of the ```EnergyType.sum_data()``` method for embedded processing.
+
+```EnergyType.combine_data(modifier)``` method was added for easier modification of load or resource data by being able to scale data by column and sum them into a column.
+
+The spinning reserve calculation is now an equation instead of a maximum between two values for faster calculation.
+
+Other general optimization was also implemented.
+
 ## MiGRIDS Lite History
 
 MiGRIDS was developed by a research team at the University of Alaska Fairbanks [Alaska Center for

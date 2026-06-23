@@ -14,6 +14,13 @@ class OpParams:
         :param gen_to_batt: charge the battery from excess diesel generation when the required load is under the mol of
         the powerhouse
         """
+        if (resource_src_mult < 0) or (resource_src_mult > 1):
+            raise Exception('Error: resource SRC multiplier must be between 0 and 1')
+        if (src_mult < 0) or (src_mult > 1):
+            raise Exception('Error: load SRC multiplier must be between 0 and 1')
+        if (batt_reset < 0) or (batt_reset > 1):
+            raise Exception('Error: battery reset value must be between 0 and 1')
+
         self.src_mult = src_mult
         self.resource_src_mult = resource_src_mult
         self.batt_reset = batt_reset

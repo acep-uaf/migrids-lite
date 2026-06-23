@@ -44,9 +44,9 @@ class SrcLimits:
         calculates the diesel capacity required, which is the max between 'diesel_src_req' and 'dummy_diesel'
         :param resource_src_multi: spinning reserve multiplier in percent as decimal
         """
-        unclip_diesel_cap = pd.concat([self.calc_frame['diesel_src_req'],
-                                       resource_src_multi*self.calc_frame['dummy_diesel'], self.calc_frame['load_src']], axis=1).max(axis=1)
-        self.calc_frame['src_diesel_capacity'] = unclip_diesel_cap
+        unclip_diesel_cap = self.calc_frame['diesel_src_req'] - (1 - resource_src_multi)*self.resource['resource']
+
+        self.calc_frame['src_diesel_capacity'] = unclip_diesel_cap.clip(0, None)
 
     def src_diesel_cap_combo(self):
         self.calc_frame['src_diesel_combo'] = self.calc_frame['src_diesel_capacity'].apply(self.powerhouse.find_cap_combo)
