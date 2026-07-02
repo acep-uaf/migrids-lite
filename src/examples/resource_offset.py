@@ -26,5 +26,6 @@ power_house = mlt.Powerhouse.Powerhouse((four_hund,))
 resource_offset = mlt.System.System(electric_load, power_house, 'r', resource_input=resources)
 
 # print some useful things
+print(resource_offset.src.calc_frame)
 print(resource_offset.vitals.frame)
 print(resource_offset.vitals.totals)

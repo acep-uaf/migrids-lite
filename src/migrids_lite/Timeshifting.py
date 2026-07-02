@@ -41,9 +41,8 @@ class Timeshift:
             self.init_frame['storage_charge_max'] = dsrc_plus_diesel.clip(0, storage.rated_charge)
 
         # calculating the timeseries discharge by the minimum between load minus resource surplus and rated discharge
-        # max(rated discharge, load-resource)
-        self.init_frame['storage_discharge_max'] = (self.elec_load['electric_load'] -
-                                                    self.init_frame['dsrc_resource_out']).clip(None, storage.rated_discharge)
+        # min(rated discharge, load-resource)
+        self.init_frame['storage_discharge_max'] = self.init_frame['src_diesel_output'].clip(None, storage.rated_discharge)
 
         # get the charge or discharge
         charge_discharge = pd.concat([self.init_frame['storage_charge_max'], self.init_frame['storage_discharge_max']],
@@ -60,7 +59,6 @@ class Timeshift:
         iterate over the battery state of charge once
         :param batt_soc: pandas series of the battery state of charge to iterate from
         :param batt_reset: reset value for the battery
-        :param gen_to_batt: use excess diesel generation to charge the battery
         :return: the converged dataframe or return an error if it doesn't converge.
         """
         iter_frame = pd.DataFrame()
@@ -87,12 +85,15 @@ class Timeshift:
         # diesel cap
         diesel_cap_req = pd.concat([self.init_frame['diesel_src_req'], iter_frame['diesel_out_poss']], axis=1)
         iter_frame['diesel_cap_req'] = diesel_cap_req.max(axis=1)
+        iter_frame['cap_combo'] = iter_frame['diesel_cap_req'].apply(lambda x: self.powerhouse.find_cap_combo(x))
+        iter_frame['combo_mol'] = iter_frame['cap_combo'].apply(lambda x: self.powerhouse.find_mol(x))
 
         # find the diesel out possible
-        before_diesel_out = iter_frame['diesel_out_poss'].clip(self.powerhouse.min_mol, None)
+        before_diesel_out = iter_frame[['diesel_out_poss', 'combo_mol']].max(axis=1)
         true_diesel_out = pd.concat([before_diesel_out, self.static_frame['electric_load']], axis = 1)
+
         # if there is no load, shut the diesels off, else have it at the mol
-        iter_frame['diesel_out'] = true_diesel_out.apply(lambda x: x['diesel_out_poss'] if x['electric_load'] > 0
+        iter_frame['diesel_out'] = true_diesel_out.apply(lambda x: x[0] if x['electric_load'] > 0
                                                         else 0, axis=1)
 
         iter_frame['discharge'] = -1 * (self.static_frame['electric_load'] - self.static_frame['resource_to_load'] -

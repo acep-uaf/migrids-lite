@@ -4,7 +4,7 @@ from migrids_lite import EnergyInputs as EIn
 from migrids_lite import Powerhouse as powhouse
 import warnings
 
-def get_mins_and_zeros(dummy, mol):
+def get_maxs_and_zeros(dummy, mol):
     if dummy == 0:
         return 0
     else:
@@ -66,8 +66,8 @@ class SrcLimits:
                           'instances where its value is below the minimum output of the powerhouse. '
                           'Excess electricity will be generated.', stacklevel=4)
 
-        self.calc_frame['src_combo_mol'] = self.calc_frame['src_diesel_combo'].apply(lambda x: self.powerhouse.combo_mol_caps[x])
-        self.calc_frame['src_diesel_output'] = self.calc_frame.apply(lambda x: get_mins_and_zeros(x['dummy_diesel'],
+        self.calc_frame['src_combo_mol'] = self.calc_frame['src_diesel_combo'].apply(lambda x: self.powerhouse.find_mol(x))
+        self.calc_frame['src_diesel_output'] = self.calc_frame.apply(lambda x: get_maxs_and_zeros(x['dummy_diesel'],
                                                                                                   x['src_combo_mol']), axis=1)
 
 
